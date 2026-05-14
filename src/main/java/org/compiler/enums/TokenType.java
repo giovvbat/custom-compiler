@@ -1,26 +1,52 @@
 package org.compiler.enums;
 
-// adicionar restante dos regex
+import java.util.regex.Pattern;
+
 public enum TokenType {
-    IDENTIFIER("[a-zA-Z]\\w*");
-    // DOUBLE_TYPE,
-    // CHAR_TYPE,
-    // BOOLEAN_TYPE,
-    // STRING_TYPE,
-    // DOUBLE_VALUE,
-    // CHAR_VALUE,
-    // BOOLEAN_VALUE,
-    // STRING_VALUE,
-    // PLUS,
-    // EQUALS,
-    // CMP,
-    // FOR,
-    // IF,
-    // EOF;
+    // palavras-chave
+    CLASS("class\\b"),
+    PUBLIC("public\\b"),
+    STATIC_VOID_MAIN("static void main\\b"),
+    STRING_TYPE("String\\b"),
+    RETURN("return\\b"),
+    INT_TYPE("int\\b"),
+    BOOLEAN_TYPE("boolean\\b"),
+    IF("if\\b"),
+    WHILE("while\\b"),
+    SYSTEM_OUT_PRINTLN("System\\.out\\.println\\b"),
+    NEW("new\\b"),
+    TRUE("true\\b"),
+    FALSE("false\\b"),
+    THIS("this\\b"),
+    LENGTH("length\\b"),
 
-    private final String regex;
+    PAREN_LEFT("\\("),
+    PAREN_RIGHT("\\)"),
+    CURLY_BRACKET_LEFT("\\{"),
+    CURLY_BRACKET_RIGHT("\\}"),
+    SQUARE_BRACKET_LEFT("\\["),
+    SQUARE_BRACKET_RIGHT("\\]"),
+    SEMI_COLON(";"),
+    COMMA(","),
+    EQUALS("="),
+    AND("&&"),
+    GREATER(">"),
+    LESS("<"),
+    PLUS("\\+"),
+    MINUS("-"),
+    MULTIPLY("\\*"),
+    DOT("\\."),
+    NOT("!"),
 
-    TokenType(String s) {
-        regex = s;
+    NUMBER("[0-9]+"),
+
+    ID("[a-zA-Z]\\w*");
+
+    public final String regex;
+    public final Pattern pattern;
+
+    TokenType(String rule) {
+        this.regex = rule;
+        this.pattern = Pattern.compile(rule);
     }
 }
