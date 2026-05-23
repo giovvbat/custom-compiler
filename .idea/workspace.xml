@@ -6,10 +6,11 @@
   <component name="ChangeListManager">
     <list default="true" id="4572e676-f937-460d-94af-9f127f5c78f7" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/asset-1.txt" beforeDir="false" afterPath="$PROJECT_DIR$/assets/asset-1.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/compiler/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/compiler/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/compiler/analyzer/Lexer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/compiler/analyzer/Lexer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/compiler/enums/TokenType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/compiler/enums/TokenType.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/asset-1.ling" beforeDir="false" afterPath="$PROJECT_DIR$/assets/asset-1.ling" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/compiler/analyzer/Parser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/compiler/analyzer/Parser.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/compiler/domain/Grammar.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/compiler/domain/Grammar.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/compiler/enums/NonTerminalSymbol.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/compiler/enums/NonTerminalSymbol.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/compiler/enums/TerminalSymbol.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/compiler/enums/TerminalSymbol.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -19,6 +20,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
+        <option value="Record" />
+        <option value="Interface" />
         <option value="Enum" />
         <option value="Class" />
       </list>
@@ -27,9 +30,9 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 6
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 6
+}</component>
   <component name="ProjectId" id="3DSTmwFCtLViPyJ5FTXpfirwU64" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
@@ -42,6 +45,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "main",
     "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/Users/giovannabatista/Desktop/custom-compiler",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -50,6 +54,11 @@
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="org.compiler.exception" />
+    </key>
+  </component>
   <component name="RunManager">
     <configuration name="Main" type="Application" factoryName="Application">
       <option name="MAIN_CLASS_NAME" value="org.compiler.Main" />
@@ -75,7 +84,14 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1778274635501</updated>
-      <workItem from="1778274636686" duration="4994000" />
+      <workItem from="1778274636686" duration="5624000" />
+      <workItem from="1778288795074" duration="600000" />
+      <workItem from="1778341205620" duration="598000" />
+      <workItem from="1778343676960" duration="90000" />
+      <workItem from="1778344206621" duration="45000" />
+      <workItem from="1778589306567" duration="6155000" />
+      <workItem from="1778716899722" duration="15692000" />
+      <workItem from="1779502939175" duration="15948000" />
     </task>
     <servers />
   </component>

@@ -1,5 +1,27 @@
-class Hello {
+/**
+* Aqui começa o programa
+**/
+class Programa{
     public static void main(String[] a){
-	System.out.println();
+        System.out.println(9);
     }
 }
+
+class Teste extends Programa {
+    int x;
+    boolean t;
+
+    public int oi(int p) {
+        x=0;
+
+        if (8) {
+        x=0;
+        }
+
+        return p;
+    }
+}
+
+/**
+* Aqui tem uma funcao
+**/

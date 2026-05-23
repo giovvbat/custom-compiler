@@ -1,8 +1,7 @@
 package org.compiler.analyzer;
 
 import org.compiler.domain.Token;
-import org.compiler.enums.TokenType;
-import org.compiler.exception.LexicalErrorException;
+import org.compiler.enums.TerminalSymbol;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,9 +21,13 @@ public class Lexer {
                 position++;
             }
 
+            if (position == input.length()) {
+                return tokens;
+            }
+
             boolean match = false;
 
-            for (TokenType type : TokenType.values()) {
+            for (TerminalSymbol type : TerminalSymbol.values()) {
                 Matcher matcher = type.pattern.matcher(input).region(position, input.length());
 
                 if (matcher.lookingAt()) {
@@ -40,7 +43,7 @@ public class Lexer {
             }
 
             if (!match) {
-                throw new LexicalErrorException("invalid character '" + input.charAt(position) + "' caused a lexical error");
+                throw new RuntimeException("lexical error: invalid character '" + input.charAt(position) + "' found in input");
             }
         }
 
