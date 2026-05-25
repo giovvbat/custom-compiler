@@ -93,6 +93,7 @@ public class Grammar {
         rules.put(NonTerminalSymbol.EXP_REST, List.of(
                 List.of(TerminalSymbol.AND, NonTerminalSymbol.EXP, NonTerminalSymbol.EXP_REST),
                 List.of(TerminalSymbol.GREATER, NonTerminalSymbol.EXP, NonTerminalSymbol.EXP_REST),
+                List.of(TerminalSymbol.LESS, NonTerminalSymbol.EXP, NonTerminalSymbol.EXP_REST),
                 List.of(TerminalSymbol.PLUS, NonTerminalSymbol.EXP, NonTerminalSymbol.EXP_REST),
                 List.of(TerminalSymbol.MINUS, NonTerminalSymbol.EXP, NonTerminalSymbol.EXP_REST),
                 List.of(TerminalSymbol.MULTIPLY, NonTerminalSymbol.EXP, NonTerminalSymbol.EXP_REST),

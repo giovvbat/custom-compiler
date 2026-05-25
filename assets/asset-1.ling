@@ -1,20 +1,19 @@
-/**
-* Aqui começa o programa
-**/
-class Programa{
-    public static void main(String[] a){
-        System.out.println(9);
+class Factorial {
+    public static void main(String[] a) {
+	    System.out.println(new Fac().ComputeFac(10));
     }
 }
 
-class Teste extends Programa {
-    public int oi(int p) {
-        x[1]=0;kj
+class Fac {
+    public int ComputeFac(int num) {
+	    int num_aux ;
 
-        return p;
+	    if (1 > num) {
+	        num_aux = 1 ;
+	    } else {
+	    num_aux = num * (this.ComputeFac(num-1)) ;
+	    }
+
+	    return num_aux ;
     }
 }
-
-/**
-* Aqui tem uma funcao
-**/

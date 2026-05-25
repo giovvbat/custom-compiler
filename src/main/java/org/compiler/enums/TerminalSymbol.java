@@ -35,6 +35,7 @@ public enum TerminalSymbol implements Symbol {
     EQUALS("="),
     AND("&&"),
     GREATER(">"),
+    LESS("<"),
     PLUS("\\+"),
     MINUS("-"),
     MULTIPLY("\\*"),

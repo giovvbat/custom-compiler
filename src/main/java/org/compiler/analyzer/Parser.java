@@ -21,9 +21,9 @@ public class Parser {
         execute(NonTerminalSymbol.PROG);
 
         if (isAtEnd()) {
-            System.out.println("code is syntactically correct!");
+            System.out.println("success: code is lexically and syntactically correct!");
         } else {
-            throw new RuntimeException("syntax error: unexpected token found at position " + border + " {" + tokens.get(border) + "}");
+            throw new RuntimeException("syntax error: unexpected token found at line " + tokens.get(border).line() + ", column " + tokens.get(border).column() + " {" + tokens.get(border) + "}");
         }
     }
 
@@ -68,7 +68,7 @@ public class Parser {
         if (!isAtEnd() && tokens.get(current).type() == expected) {
             current++;
         } else {
-            throw new RuntimeException("syntax error: unexpected token found at position " + border + " {" + tokens.get(border) + "}");
+            throw new RuntimeException("syntax error: unexpected token found at line " + tokens.get(current).line() + ", column " + tokens.get(current).column() + " {" + tokens.get(current) + "}");
         }
     }
 

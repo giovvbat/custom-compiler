@@ -13,10 +13,8 @@ public class Main {
     public static void main(String[] args) throws IOException {
         try {
             String input = Files.readString(Path.of(System.getProperty("user.dir"), "assets", "asset-1.ling"));
-            String cleaned = Lexer.clean(input);
-            List<Token> tokens = Lexer.tokenize(cleaned);
 
-            Parser.parse(tokens);
+            Parser.parse(Lexer.tokenize(input));
         } catch (RuntimeException exception) {
             System.err.println(exception.getMessage());
         }
