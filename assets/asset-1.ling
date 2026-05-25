@@ -8,15 +8,8 @@ class Programa{
 }
 
 class Teste extends Programa {
-    int x;
-    boolean t;
-
     public int oi(int p) {
-        x=0;
-
-        if (8) {
-        x=0;
-        }
+        x[1]=0;kj
 
         return p;
     }

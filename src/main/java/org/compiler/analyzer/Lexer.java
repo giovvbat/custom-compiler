@@ -43,7 +43,7 @@ public class Lexer {
             }
 
             if (!match) {
-                throw new RuntimeException("lexical error: invalid character '" + input.charAt(position) + "' found in input");
+                throw new RuntimeException("lexical error: invalid character found in input at position " + position + " {" + input.charAt(position) + "}");
             }
         }
 

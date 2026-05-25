@@ -12,6 +12,7 @@ public class Parser {
     private static List<Token> tokens;
     private static Grammar grammar;
     private static int current = 0;
+    private static int border = 0;
 
     public static void parse(List<Token> tokens) {
         Parser.tokens = tokens;
@@ -22,12 +23,16 @@ public class Parser {
         if (isAtEnd()) {
             System.out.println("code is syntactically correct!");
         } else {
-            throw new RuntimeException("syntax error: tokens left unparsed at EOF");
+            throw new RuntimeException("syntax error: unexpected token found at position " + border + " {" + tokens.get(border) + "}");
         }
     }
 
     private static void execute(NonTerminalSymbol symbol) {
         List<List<Symbol>> rules = grammar.getRules().get(symbol);
+
+        if (current > border) {
+            border = current;
+        }
 
         for (int i = 0; i < rules.size(); i++) {
             boolean match = true;
@@ -63,7 +68,7 @@ public class Parser {
         if (!isAtEnd() && tokens.get(current).type() == expected) {
             current++;
         } else {
-            throw new RuntimeException("syntax error: invalid code (expected: " + expected + ", actual: " + tokens.get(current).type() + ")");
+            throw new RuntimeException("syntax error: unexpected token found at position " + border + " {" + tokens.get(border) + "}");
         }
     }
 

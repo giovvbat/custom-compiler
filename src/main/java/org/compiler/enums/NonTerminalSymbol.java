@@ -24,6 +24,10 @@ public enum NonTerminalSymbol implements Symbol {
 
     // expressions
     EXP,
+    BASE_EXP,
+    NEW_REST,
+    EXP_REST,
+    DOT_REST,
     LIST_EXP,
     REST_LIST_EXP;
 }
