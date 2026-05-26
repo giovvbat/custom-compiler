@@ -6,13 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="4572e676-f937-460d-94af-9f127f5c78f7" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/asset-1.ling" beforeDir="false" afterPath="$PROJECT_DIR$/assets/asset-1.ling" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/compiler/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/compiler/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/compiler/analyzer/Lexer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/compiler/analyzer/Lexer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/compiler/analyzer/Parser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/compiler/analyzer/Parser.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/compiler/domain/Grammar.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/compiler/domain/Grammar.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/compiler/domain/Token.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/compiler/domain/Token.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/compiler/enums/TerminalSymbol.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/compiler/enums/TerminalSymbol.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -94,7 +87,7 @@
       <workItem from="1778589306567" duration="6155000" />
       <workItem from="1778716899722" duration="15692000" />
       <workItem from="1779502939175" duration="15948000" />
-      <workItem from="1779719124689" duration="2742000" />
+      <workItem from="1779719124689" duration="3548000" />
     </task>
     <servers />
   </component>
