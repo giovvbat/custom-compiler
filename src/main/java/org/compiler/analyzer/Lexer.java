@@ -106,7 +106,7 @@ public class Lexer {
             }
 
             if (!match) {
-                throw new RuntimeException("lexical error: invalid character found in input at line " + tokenLine + ", column " + tokenColumn + " {" + input.charAt(position) + "}");
+                throw new RuntimeException("LEXICAL ERROR: invalid character found in input at line " + tokenLine + ", column " + tokenColumn + " {" + input.charAt(position) + "}");
             }
         }
 

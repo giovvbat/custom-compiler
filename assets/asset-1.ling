@@ -11,6 +11,7 @@ class Fac {
 	    if (1 > num) {
 	        num_aux = 1 ;
 	    } else {
+	    x = oi.kcjn();
 	    num_aux = num * (this.ComputeFac(num-1)) ;
 	    }
 
