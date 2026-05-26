@@ -49,10 +49,11 @@ public class Grammar {
         ));
 
         rules.put(NonTerminalSymbol.CMD, List.of(
+                List.of(TerminalSymbol.CURLY_BRACKET_LEFT, NonTerminalSymbol.CMDS, TerminalSymbol.CURLY_BRACKET_RIGHT),
                 List.of(TerminalSymbol.SYSTEM_OUT_PRINTLN, TerminalSymbol.PAREN_LEFT, NonTerminalSymbol.EXP, TerminalSymbol.PAREN_RIGHT, TerminalSymbol.SEMI_COLON),
-                List.of(TerminalSymbol.WHILE, TerminalSymbol.PAREN_LEFT, NonTerminalSymbol.EXP, TerminalSymbol.PAREN_RIGHT, TerminalSymbol.CURLY_BRACKET_LEFT, NonTerminalSymbol.CMDS, TerminalSymbol.CURLY_BRACKET_RIGHT),
-                List.of(TerminalSymbol.ID, NonTerminalSymbol.CMD_ID_REST), // Fatoração do ID
-                List.of(TerminalSymbol.IF, TerminalSymbol.PAREN_LEFT, NonTerminalSymbol.EXP, TerminalSymbol.PAREN_RIGHT, TerminalSymbol.CURLY_BRACKET_LEFT, NonTerminalSymbol.CMDS, TerminalSymbol.CURLY_BRACKET_RIGHT, NonTerminalSymbol.CMD_IF_REST) // Fatoração do IF
+                List.of(TerminalSymbol.WHILE, TerminalSymbol.PAREN_LEFT, NonTerminalSymbol.EXP, TerminalSymbol.PAREN_RIGHT, NonTerminalSymbol.CMD),
+                List.of(TerminalSymbol.ID, NonTerminalSymbol.CMD_ID_REST),
+                List.of(TerminalSymbol.IF, TerminalSymbol.PAREN_LEFT, NonTerminalSymbol.EXP, TerminalSymbol.PAREN_RIGHT, NonTerminalSymbol.CMD, NonTerminalSymbol.CMD_IF_REST)
         ));
 
         rules.put(NonTerminalSymbol.CMD_ID_REST, List.of(
@@ -61,7 +62,7 @@ public class Grammar {
         ));
 
         rules.put(NonTerminalSymbol.CMD_IF_REST, List.of(
-                List.of(TerminalSymbol.ELSE, TerminalSymbol.CURLY_BRACKET_LEFT, NonTerminalSymbol.CMDS, TerminalSymbol.CURLY_BRACKET_RIGHT),
+                List.of(TerminalSymbol.ELSE, NonTerminalSymbol.CMD),
                 List.of(NonTerminalSymbol.EMPTY)
         ));
 
