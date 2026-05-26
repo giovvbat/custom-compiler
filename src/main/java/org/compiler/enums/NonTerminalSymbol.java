@@ -29,5 +29,10 @@ public enum NonTerminalSymbol implements Symbol {
     EXP_REST,
     DOT_REST,
     LIST_EXP,
-    REST_LIST_EXP;
+    REST_LIST_EXP,
+
+    DEF_CL_REST,
+    TYPE_REST,
+    CMD_ID_REST,
+    CMD_IF_REST;
 }

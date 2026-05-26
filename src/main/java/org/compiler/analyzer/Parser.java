@@ -11,6 +11,7 @@ import java.util.List;
 public class Parser {
     private static List<Token> tokens;
     private static Grammar grammar;
+
     private static int current = 0;
     private static int border = 0;
 
@@ -23,7 +24,7 @@ public class Parser {
         if (isAtEnd()) {
             System.out.println("SUCCESS: code is lexically and syntactically correct!");
         } else {
-            throw new RuntimeException("SYNTAX ERROR: unexpected token found in input");
+            throw new RuntimeException("SYNTAX ERROR: unexpected token found at line " + tokens.get(border).line() + ", column " + tokens.get(border).column() + " {" + tokens.get(border) + "}");
         }
     }
 
@@ -67,8 +68,12 @@ public class Parser {
     private static void match(TerminalSymbol expected) {
         if (!isAtEnd() && tokens.get(current).type() == expected) {
             current++;
+
+            if (current > border) {
+                border = current;
+            }
         } else {
-            throw new RuntimeException("SYNTAX ERROR: unexpected token found in input");
+            throw new RuntimeException("SYNTAX ERROR: unexpected token found at line " + tokens.get(border).line() + ", column " + tokens.get(border).column() + " {" + tokens.get(border) + "}");
         }
     }
 
