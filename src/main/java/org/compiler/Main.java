@@ -12,7 +12,7 @@ import java.util.List;
 public class Main {
     public static void main(String[] args) throws IOException {
         try {
-            String input = Files.readString(Path.of(System.getProperty("user.dir"), "assets", "asset-1.ling"));
+            String input = Files.readString(Path.of(System.getProperty("user.dir"), "assets", "Program2.ling"));
 
             Parser.parse(Lexer.tokenize(input));
         } catch (RuntimeException exception) {

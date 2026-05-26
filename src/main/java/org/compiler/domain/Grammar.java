@@ -24,9 +24,13 @@ public class Grammar {
         ));
 
         rules.put(NonTerminalSymbol.DEF_CL, List.of(
-                List.of(TerminalSymbol.CLASS, TerminalSymbol.ID, TerminalSymbol.CURLY_BRACKET_LEFT, NonTerminalSymbol.DEF_VAR, NonTerminalSymbol.DEF_MET, TerminalSymbol.CURLY_BRACKET_RIGHT, NonTerminalSymbol.DEF_CL),
-                List.of(TerminalSymbol.CLASS, TerminalSymbol.ID, TerminalSymbol.EXTENDS, TerminalSymbol.ID, TerminalSymbol.CURLY_BRACKET_LEFT, NonTerminalSymbol.DEF_VAR, NonTerminalSymbol.DEF_MET, TerminalSymbol.CURLY_BRACKET_RIGHT, NonTerminalSymbol.DEF_CL),
+                List.of(TerminalSymbol.CLASS, TerminalSymbol.ID, NonTerminalSymbol.DEF_CL_REST),
                 List.of(NonTerminalSymbol.EMPTY)
+        ));
+
+        rules.put(NonTerminalSymbol.DEF_CL_REST, List.of(
+                List.of(TerminalSymbol.CURLY_BRACKET_LEFT, NonTerminalSymbol.DEF_VAR, NonTerminalSymbol.DEF_MET, TerminalSymbol.CURLY_BRACKET_RIGHT, NonTerminalSymbol.DEF_CL),
+                List.of(TerminalSymbol.EXTENDS, TerminalSymbol.ID, TerminalSymbol.CURLY_BRACKET_LEFT, NonTerminalSymbol.DEF_VAR, NonTerminalSymbol.DEF_MET, TerminalSymbol.CURLY_BRACKET_RIGHT, NonTerminalSymbol.DEF_CL)
         ));
 
         rules.put(NonTerminalSymbol.DEF_VAR, List.of(
@@ -46,18 +50,30 @@ public class Grammar {
 
         rules.put(NonTerminalSymbol.CMD, List.of(
                 List.of(TerminalSymbol.SYSTEM_OUT_PRINTLN, TerminalSymbol.PAREN_LEFT, NonTerminalSymbol.EXP, TerminalSymbol.PAREN_RIGHT, TerminalSymbol.SEMI_COLON),
-                List.of(TerminalSymbol.ID, TerminalSymbol.EQUALS, NonTerminalSymbol.EXP, TerminalSymbol.SEMI_COLON),
-                List.of(TerminalSymbol.ID, TerminalSymbol.SQUARE_BRACKET_LEFT, NonTerminalSymbol.EXP, TerminalSymbol.SQUARE_BRACKET_RIGHT, TerminalSymbol.EQUALS, NonTerminalSymbol.EXP, TerminalSymbol.SEMI_COLON),
                 List.of(TerminalSymbol.WHILE, TerminalSymbol.PAREN_LEFT, NonTerminalSymbol.EXP, TerminalSymbol.PAREN_RIGHT, TerminalSymbol.CURLY_BRACKET_LEFT, NonTerminalSymbol.CMDS, TerminalSymbol.CURLY_BRACKET_RIGHT),
-                List.of(TerminalSymbol.IF, TerminalSymbol.PAREN_LEFT, NonTerminalSymbol.EXP, TerminalSymbol.PAREN_RIGHT, TerminalSymbol.CURLY_BRACKET_LEFT, NonTerminalSymbol.CMDS, TerminalSymbol.CURLY_BRACKET_RIGHT, TerminalSymbol.ELSE, TerminalSymbol.CURLY_BRACKET_LEFT, NonTerminalSymbol.CMDS, TerminalSymbol.CURLY_BRACKET_RIGHT),
-                List.of(TerminalSymbol.IF, TerminalSymbol.PAREN_LEFT, NonTerminalSymbol.EXP, TerminalSymbol.PAREN_RIGHT, TerminalSymbol.CURLY_BRACKET_LEFT, NonTerminalSymbol.CMDS, TerminalSymbol.CURLY_BRACKET_RIGHT)
+                List.of(TerminalSymbol.ID, NonTerminalSymbol.CMD_ID_REST), // Fatoração do ID
+                List.of(TerminalSymbol.IF, TerminalSymbol.PAREN_LEFT, NonTerminalSymbol.EXP, TerminalSymbol.PAREN_RIGHT, TerminalSymbol.CURLY_BRACKET_LEFT, NonTerminalSymbol.CMDS, TerminalSymbol.CURLY_BRACKET_RIGHT, NonTerminalSymbol.CMD_IF_REST) // Fatoração do IF
+        ));
+
+        rules.put(NonTerminalSymbol.CMD_ID_REST, List.of(
+                List.of(TerminalSymbol.EQUALS, NonTerminalSymbol.EXP, TerminalSymbol.SEMI_COLON),
+                List.of(TerminalSymbol.SQUARE_BRACKET_LEFT, NonTerminalSymbol.EXP, TerminalSymbol.SQUARE_BRACKET_RIGHT, TerminalSymbol.EQUALS, NonTerminalSymbol.EXP, TerminalSymbol.SEMI_COLON)
+        ));
+
+        rules.put(NonTerminalSymbol.CMD_IF_REST, List.of(
+                List.of(TerminalSymbol.ELSE, TerminalSymbol.CURLY_BRACKET_LEFT, NonTerminalSymbol.CMDS, TerminalSymbol.CURLY_BRACKET_RIGHT),
+                List.of(NonTerminalSymbol.EMPTY)
         ));
 
         rules.put(NonTerminalSymbol.TYPE, List.of(
-                List.of(TerminalSymbol.INT_TYPE, TerminalSymbol.SQUARE_BRACKET_LEFT, TerminalSymbol.SQUARE_BRACKET_RIGHT),
+                List.of(TerminalSymbol.INT_TYPE, NonTerminalSymbol.TYPE_REST),
                 List.of(TerminalSymbol.BOOLEAN_TYPE),
-                List.of(TerminalSymbol.INT_TYPE),
                 List.of(TerminalSymbol.ID)
+        ));
+
+        rules.put(NonTerminalSymbol.TYPE_REST, List.of(
+                List.of(TerminalSymbol.SQUARE_BRACKET_LEFT, TerminalSymbol.SQUARE_BRACKET_RIGHT),
+                List.of(NonTerminalSymbol.EMPTY)
         ));
 
         rules.put(NonTerminalSymbol.ARGS, List.of(
