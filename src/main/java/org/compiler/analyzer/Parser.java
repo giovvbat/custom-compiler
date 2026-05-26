@@ -21,7 +21,7 @@ public class Parser {
         Parser.grammar = new Grammar();
         Parser.current = 0;
 
-        execute(NonTerminalSymbol.PROG);
+        execute(NonTerminalSymbol.PROG, new HashSet<>());
 
         if (isAtEnd()) {
             System.out.println("success: code is lexically and syntactically correct!");
@@ -36,17 +36,21 @@ public class Parser {
         }
     }
 
-    private static void execute(NonTerminalSymbol symbol) {
+    private static void execute(NonTerminalSymbol symbol, Set<TerminalSymbol> localFollowers) {
         List<List<Symbol>> rules = grammar.getRules().get(symbol);
 
         TerminalSymbol lookahead = isAtEnd() ? null : tokens.get(current).type();
-        List<Symbol> chosenRule = predictRule(symbol, rules, lookahead);
+        List<Symbol> chosenRule = predictRule(symbol, rules, lookahead, localFollowers);
 
         // Se o lookahead não pegar nenhuma regra e não tiver a palavra vazia
         if(chosenRule == null){
             Token t = isAtEnd() ? tokens.get(tokens.size() -1 ) : tokens.get(current);
             String lexeme = isAtEnd() ? "EOF" : t.lexeme();
-            Set<TerminalSymbol> expectedTokens = getExpectedTerminals(symbol, new java.util.HashSet<>());
+            Set<TerminalSymbol> expectedTokens = new HashSet<>(getFirst(symbol, new HashSet<>()));
+            if (derivesEmpty(symbol) || expectedTokens.isEmpty()) {
+                expectedTokens.addAll(localFollowers);
+            }
+
             String expectedList = expectedTokens.stream()
                     .map(TerminalSymbol::name)
                     .collect(java.util.stream.Collectors.joining(", "));
@@ -57,30 +61,31 @@ public class Parser {
             ));
         }
 
-        for(Symbol s: chosenRule){
+        for (int i = 0; i < chosenRule.size(); i++) {
+            Symbol s = chosenRule.get(i);
             if (s == NonTerminalSymbol.EMPTY) continue;
             if (s instanceof TerminalSymbol) {
                 match((TerminalSymbol) s);
             } else {
-                execute((NonTerminalSymbol) s);
-            }
-        }
-
-    }
-    private static List<Symbol> predictRule(NonTerminalSymbol symbol ,List<List<Symbol>> rules, TerminalSymbol lookahead){
-        if(symbol == NonTerminalSymbol.DEF_VAR && lookahead == TerminalSymbol.ID){
-            TerminalSymbol lookahead2 = (current + 1 < tokens.size()) ? tokens.get(current + 1).type(): null;
-            if(lookahead2 == TerminalSymbol.ID){
-                return rules.get(0);
-            } else{
-                for (List<Symbol> rule : rules){
-                    if (rule.isEmpty() || (rule.size() == 1 && rule.get(0) == NonTerminalSymbol.EMPTY)){
-                        return rule;
+                Set<TerminalSymbol> nextFollowers = new HashSet<>();
+                boolean allDeriveEmpty = true;
+                for (int j = i + 1; j < chosenRule.size(); j++) {
+                    Symbol nextSymbol = chosenRule.get(j);
+                    nextFollowers.addAll(getFirst(nextSymbol, new HashSet<>()));
+                    if (!(nextSymbol instanceof NonTerminalSymbol) || !derivesEmpty((NonTerminalSymbol) nextSymbol)) {
+                        allDeriveEmpty = false;
+                        break;
                     }
                 }
+                if (allDeriveEmpty) {
+                    nextFollowers.addAll(localFollowers);
+                }
+                execute((NonTerminalSymbol) s, nextFollowers);
             }
-
         }
+    }
+    private static List<Symbol> predictRule(NonTerminalSymbol symbol ,List<List<Symbol>> rules, TerminalSymbol lookahead,
+                                            Set<TerminalSymbol> localFollowers){
         // Tenta achar a regra que starta com o lookahead
         if(lookahead != null){
             for(List<Symbol> rule : rules){
@@ -93,7 +98,7 @@ public class Parser {
         for (List<Symbol> rule : rules) {
             if (rule.isEmpty() || (rule.size() == 1 && rule.get(0) == NonTerminalSymbol.EMPTY)) {
                 boolean isExpressionTail = symbol.name().contains("EXP") || symbol.name().contains("REST");
-                if (lookahead == null || isLegalFollower(symbol, lookahead) || isExpressionTail) {
+                if (lookahead == null || localFollowers.contains(lookahead) || isExpressionTail) {
                     return rule;
                 }
             }
@@ -133,37 +138,6 @@ public class Parser {
         }
         return false;
     }
-    private static Set<TerminalSymbol> getFollowers(NonTerminalSymbol target, Set<NonTerminalSymbol> visited) {
-        Set<TerminalSymbol> followers = new java.util.HashSet<>();
-
-        if (visited.contains(target)) return followers;
-        visited.add(target);
-
-        for (java.util.Map.Entry<NonTerminalSymbol, List<List<Symbol>>> entry : grammar.getRules().entrySet()) {
-            NonTerminalSymbol leftSide = entry.getKey();
-
-            for (List<Symbol> rule : entry.getValue()) {
-                for (int i = 0; i < rule.size(); i++) {
-                    if (rule.get(i) == target) {
-                        if (i + 1 < rule.size()) {
-                            Symbol nextSymbol = rule.get(i + 1);
-                            followers.addAll(getFirst(nextSymbol, new java.util.HashSet<>()));
-                            if (nextSymbol instanceof NonTerminalSymbol && derivesEmpty((NonTerminalSymbol) nextSymbol)) {
-                                if (leftSide != target) {
-                                    followers.addAll(getFollowers(leftSide, visited));
-                                }
-                            }
-                        } else {
-                            if (leftSide != target) {
-                                followers.addAll(getFollowers(leftSide, visited));
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return followers;
-    }
 
     private static Set<TerminalSymbol> getFirst(Symbol symbol, Set<NonTerminalSymbol> visited) {
         Set<TerminalSymbol> first = new HashSet<>();
@@ -193,9 +167,7 @@ public class Parser {
         }
         return false;
     }
-    private static boolean isLegalFollower(NonTerminalSymbol symbol, TerminalSymbol lookahead) {
-        return getFollowers(symbol, new HashSet<>()).contains(lookahead);
-    }
+
     private static void match(TerminalSymbol expected) {
         if (!isAtEnd() && tokens.get(current).type() == expected) {
             current++;
@@ -216,24 +188,4 @@ public class Parser {
         return current >= tokens.size();
     }
 
-    private static Set<TerminalSymbol> getExpectedTerminals(NonTerminalSymbol nonTerminal, Set<NonTerminalSymbol> visited){
-        Set<TerminalSymbol> expected = new HashSet<>();
-
-        if(visited.contains(nonTerminal)) return expected;
-        visited.add(nonTerminal);
-        List<List<Symbol>> rules = grammar.getRules().get(nonTerminal);
-        for(List<Symbol> rule: rules){
-            if(rule.isEmpty() || (rule.size() == 1 && rule.get(0) == NonTerminalSymbol.EMPTY)){
-                expected.addAll(getFollowers(nonTerminal, new HashSet<>()));
-                continue;
-            }
-            Symbol first = rule.get(0);
-            if(first instanceof TerminalSymbol){
-                expected.add((TerminalSymbol) first);
-            }else if(first instanceof NonTerminalSymbol){
-                expected.addAll(getExpectedTerminals((NonTerminalSymbol) first, visited));
-            }
-        }
-    return expected;
-    }
 }
