@@ -164,13 +164,17 @@ public class Parser {
         } else {
             Token t = isAtEnd() ? tokens.get(tokens.size() - 1) : tokens.get(current);
             String lexeme = isAtEnd() ? "EOF" : t.lexeme();
-            throw new RuntimeException(String.format(
+            String errorMessage = String.format(
                     "syntax error: expected %s but found '%s' at line %d, column %d",
                     expected.name(),
                     lexeme,
                     t.line(),
                     t.column()
-            ));
+            );
+            if (expected == TerminalSymbol.SEMI_COLON) {
+                errorMessage += ". Did you perhaps forget a semi-colon?";
+            }
+             throw new RuntimeException(errorMessage);
         }
     }
 
