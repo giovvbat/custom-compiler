@@ -1,7 +1,6 @@
 class Factorial {
     public static void main(String[] a) {
 	    System.out.println(new Fac().ComputeFac(10));
-	    x=a_;
     }
 }
 
@@ -9,10 +8,8 @@ class Fac {
     public int ComputeFac(int num) {
 	    int num_aux;
 
-	    if (1 > num)
-	    x = oi.oi();
-	     else {x = p; x=o;}
-
+	    if (1 > num) x = oi.oi();
+	    else x = p;
 
 	    return num_aux ;
     }
