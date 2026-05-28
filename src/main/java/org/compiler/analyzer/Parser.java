@@ -5,6 +5,7 @@ import org.compiler.domain.Symbol;
 import org.compiler.enums.NonTerminalSymbol;
 import org.compiler.enums.TerminalSymbol;
 import org.compiler.domain.Token;
+import java.util.EnumSet;
 
 import java.util.HashSet;
 import java.util.List;
@@ -21,7 +22,7 @@ public class Parser {
         Parser.grammar = new Grammar();
         Parser.current = 0;
 
-        execute(NonTerminalSymbol.PROG, new HashSet<>());
+        execute(NonTerminalSymbol.PROG, EnumSet.noneOf(TerminalSymbol.class));
 
         if (isAtEnd()) {
             System.out.println("success: code is lexically and syntactically correct!");
@@ -46,7 +47,9 @@ public class Parser {
         if(chosenRule == null){
             Token t = isAtEnd() ? tokens.get(tokens.size() -1 ) : tokens.get(current);
             String lexeme = isAtEnd() ? "EOF" : t.lexeme();
-            Set<TerminalSymbol> expectedTokens = new HashSet<>(getFirst(symbol, new HashSet<>()));
+
+            Set<TerminalSymbol> expectedTokens = EnumSet.noneOf(TerminalSymbol.class);
+            expectedTokens.addAll(getFirst(symbol, EnumSet.noneOf(NonTerminalSymbol.class)));
             if (derivesEmpty(symbol) || expectedTokens.isEmpty()) {
                 expectedTokens.addAll(localFollowers);
             }
@@ -67,11 +70,11 @@ public class Parser {
             if (s instanceof TerminalSymbol) {
                 match((TerminalSymbol) s);
             } else {
-                Set<TerminalSymbol> nextFollowers = new HashSet<>();
+                Set<TerminalSymbol> nextFollowers = EnumSet.noneOf(TerminalSymbol.class);
                 boolean allDeriveEmpty = true;
                 for (int j = i + 1; j < chosenRule.size(); j++) {
                     Symbol nextSymbol = chosenRule.get(j);
-                    nextFollowers.addAll(getFirst(nextSymbol, new HashSet<>()));
+                    nextFollowers.addAll(getFirst(nextSymbol, EnumSet.noneOf(NonTerminalSymbol.class)));
                     if (!(nextSymbol instanceof NonTerminalSymbol) || !derivesEmpty((NonTerminalSymbol) nextSymbol)) {
                         allDeriveEmpty = false;
                         break;
@@ -97,8 +100,7 @@ public class Parser {
         // Se não tiver regra que case e a tenha uma transição vazia
         for (List<Symbol> rule : rules) {
             if (rule.isEmpty() || (rule.size() == 1 && rule.get(0) == NonTerminalSymbol.EMPTY)) {
-                boolean isExpressionTail = symbol.name().contains("EXP") || symbol.name().contains("REST");
-                if (lookahead == null || localFollowers.contains(lookahead) || isExpressionTail) {
+                if (lookahead == null || localFollowers.contains(lookahead)) {
                     return rule;
                 }
             }
@@ -107,40 +109,30 @@ public class Parser {
         return null;
     }
     private static boolean ruleStartsWith(List<Symbol> rule, TerminalSymbol lookahead){
-        if(rule.isEmpty() || rule.get(0) == NonTerminalSymbol.EMPTY){
+        if(rule.isEmpty() || (rule.size() == 1 && rule.get(0) == NonTerminalSymbol.EMPTY)){
             return false;
         }
-        Symbol firstSymbol = rule.get(0);
-
-        if(firstSymbol instanceof TerminalSymbol){
-            return firstSymbol == lookahead;
-        }
-
-        // se o primeiro símbolo não for terminal, pega recursivamente o primeiro dele
-        return firstSetContains((NonTerminalSymbol) firstSymbol, lookahead);
-    }
-
-    private static boolean firstSetContains(NonTerminalSymbol nonTerminal, TerminalSymbol lookahead){
-        List<List<Symbol>> rules = grammar.getRules().get(nonTerminal);
-        for(List<Symbol> rule: rules){
-            if(rule.isEmpty() || (rule.size() == 1 && rule.get(0) == NonTerminalSymbol.EMPTY)){
-                continue; // ignora regras vazias
+        for (Symbol symbol : rule) {
+            if (symbol instanceof TerminalSymbol) {
+                return symbol == lookahead;
             }
-            Symbol first = rule.get(0);
+            NonTerminalSymbol nt = (NonTerminalSymbol) symbol;
+            Set<TerminalSymbol> firstSet = getFirst(nt, EnumSet.noneOf(NonTerminalSymbol.class));
 
-            if(first instanceof TerminalSymbol){
-                if(first == lookahead) return true;
-            } else if (first instanceof NonTerminalSymbol){
-                if(first != nonTerminal && firstSetContains((NonTerminalSymbol) first, lookahead)){
-                    return true;
-                }
+            if (firstSet.contains(lookahead)) {
+                return true;
+            }
+
+            if (!derivesEmpty(nt)) {
+                return false;
             }
         }
+
         return false;
     }
 
     private static Set<TerminalSymbol> getFirst(Symbol symbol, Set<NonTerminalSymbol> visited) {
-        Set<TerminalSymbol> first = new HashSet<>();
+        Set<TerminalSymbol> first = EnumSet.noneOf(TerminalSymbol.class);
 
         if (symbol instanceof TerminalSymbol) {
             first.add((TerminalSymbol) symbol);
