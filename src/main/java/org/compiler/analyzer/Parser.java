@@ -100,7 +100,10 @@ public class Parser {
         // Se não tiver regra que case e a tenha uma transição vazia
         for (List<Symbol> rule : rules) {
             if (rule.isEmpty() || (rule.size() == 1 && rule.get(0) == NonTerminalSymbol.EMPTY)) {
-                return rule;
+                boolean isExpressionTail = symbol.name().contains("EXP") || symbol.name().contains("REST");
+                if (lookahead == null || localFollowers.contains(lookahead) || isExpressionTail) {
+                    return rule;
+                }
             }
         }
         //erro de sintaxe

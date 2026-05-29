@@ -6,6 +6,7 @@ public enum NonTerminalSymbol implements Symbol {
     // basic
     PROG,
     MAIN_C,
+    CMDS,
     CMD,
     TYPE,
 
@@ -35,4 +36,8 @@ public enum NonTerminalSymbol implements Symbol {
     DEF_MET_REST,
     TYPE_REST,
     CMD_ID_REST,
+    CMD_IF_REST,
+    VARS_THEN_CMDS,
+    ID_START_REST,
+    NON_ID_CMD,
 }
