@@ -8,9 +8,11 @@ import java.util.List;
 import java.util.regex.Matcher;
 
 public class Lexer {
-    public static List<Token> tokenize(String input) {
-        List<Token> tokens = new ArrayList<>();
+    public static List<String> errors = new ArrayList<>();
 
+    public static List<Token> tokenize(String input, boolean stopFirstError, boolean showSuggestions) {
+        List<Token> tokens = new ArrayList<>();
+        errors.clear();
         int position = 0;
         int line = 1;
         int column = 1;
@@ -106,7 +108,18 @@ public class Lexer {
             }
 
             if (!match) {
-                throw new RuntimeException("lexical error: invalid character found in input at line " + tokenLine + ", column " + tokenColumn + " {" + input.charAt(position) + "}");
+                String errorMsg = "lexical error: invalid character found in input at line " + tokenLine + ", column " + tokenColumn + " {" + input.charAt(position) + "}";
+
+                if (showSuggestions) {
+                    errorMsg += "\n  -> Suggestion: Check for typos or remove the unsupported character '" + input.charAt(position) + "'.";
+                }
+                if (stopFirstError) {
+                    throw new RuntimeException(errorMsg);
+                } else {
+                    errors.add(errorMsg);
+                    position++;
+                    column++;
+                }
             }
         }
 

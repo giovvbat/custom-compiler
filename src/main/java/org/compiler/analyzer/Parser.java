@@ -6,6 +6,7 @@ import org.compiler.enums.NonTerminalSymbol;
 import org.compiler.enums.TerminalSymbol;
 import org.compiler.domain.Token;
 import java.util.EnumSet;
+import org.compiler.semantic.SymbolTable;
 
 import java.util.HashSet;
 import java.util.List;
@@ -16,11 +17,16 @@ public class Parser {
     private static Grammar grammar;
     private static int current = 0;
     private static int border = 0;
+    private static String lastEvaluatedType = "";
+    private static boolean showSuggestions;
+    public static SymbolTable symbolTable;
 
-    public static void parse(List<Token> tokens) {
+    public static void parse(List<Token> tokens, boolean suggestionsFlag) {
         Parser.tokens = tokens;
         Parser.grammar = new Grammar();
         Parser.current = 0;
+        Parser.showSuggestions = suggestionsFlag;
+        Parser.symbolTable = new SymbolTable();
 
         execute(NonTerminalSymbol.PROG, EnumSet.noneOf(TerminalSymbol.class));
 
@@ -66,7 +72,33 @@ public class Parser {
 
         for (int i = 0; i < chosenRule.size(); i++) {
             Symbol s = chosenRule.get(i);
+
             if (s == NonTerminalSymbol.EMPTY) continue;
+
+            boolean openScope = false;
+            boolean closeScope = false;
+
+            if (symbol == NonTerminalSymbol.MAIN_C) {
+                if (i == 2 || i == 5) openScope = true; // Class scope and Main Method scope
+                if (i == 13 || i == 14) closeScope = true;
+            } else if (symbol == NonTerminalSymbol.DEF_CL_REST) {
+                if (chosenRule.get(0) == TerminalSymbol.CURLY_BRACKET_LEFT && i == 0) openScope = true;
+                if (chosenRule.get(0) == TerminalSymbol.CURLY_BRACKET_LEFT && i == 3) closeScope = true;
+                if (chosenRule.get(0) == TerminalSymbol.EXTENDS && i == 2) openScope = true;
+                if (chosenRule.get(0) == TerminalSymbol.EXTENDS && i == 5) closeScope = true;
+            } else if (symbol == NonTerminalSymbol.DEF_MET) {
+                if (i == 3) openScope = true; // Open method scope at '('
+                if (i == 11) closeScope = true; // Close method scope at '}'
+            } else if ((symbol == NonTerminalSymbol.NON_ID_CMD || symbol == NonTerminalSymbol.CMD)
+                    && chosenRule.get(0) == TerminalSymbol.CURLY_BRACKET_LEFT) {
+                if (i == 0) openScope = true;
+                if (i == 2) closeScope = true;
+            }
+
+            if(openScope) symbolTable.enterScope();
+
+            int startTokenIdx = current;
+
             if (s instanceof TerminalSymbol) {
                 match((TerminalSymbol) s);
             } else {
@@ -84,6 +116,42 @@ public class Parser {
                     nextFollowers.addAll(localFollowers);
                 }
                 execute((NonTerminalSymbol) s, nextFollowers);
+            }
+            if (closeScope) symbolTable.exitScope();
+
+            if (s == NonTerminalSymbol.TYPE || s == NonTerminalSymbol.TYPE_REST) {
+                StringBuilder typeBuilder = new StringBuilder();
+                for (int k = startTokenIdx; k < current; k++) {
+                    typeBuilder.append(tokens.get(k).lexeme());
+                }
+                if (s == NonTerminalSymbol.TYPE) lastEvaluatedType = typeBuilder.toString();
+                else if (s == NonTerminalSymbol.TYPE_REST) lastEvaluatedType = "int" + typeBuilder.toString();
+            }
+            if (s == TerminalSymbol.ID && current > 0) {
+                String lexeme = tokens.get(current - 1).lexeme();
+                boolean inserted = true;
+
+                // Declarations
+                if (symbol == NonTerminalSymbol.MAIN_C) {
+                    if (i == 1) inserted = symbolTable.put(lexeme, "class", "CLASS");
+                    else if (i == 9) inserted = symbolTable.put(lexeme, "String[]", "PARAM");
+                } else if (symbol == NonTerminalSymbol.DEF_CL && i == 1) {
+                    inserted = symbolTable.put(lexeme, "class", "CLASS");
+                } else if (symbol == NonTerminalSymbol.DEF_MET && i == 2) {
+                    inserted = symbolTable.put(lexeme, lastEvaluatedType, "METHOD");
+                } else if (symbol == NonTerminalSymbol.DEF_VAR && i == 1) {
+                    inserted = symbolTable.put(lexeme, lastEvaluatedType, "VAR");
+                } else if (symbol == NonTerminalSymbol.ARGS && i == 1) {
+                    inserted = symbolTable.put(lexeme, lastEvaluatedType, "PARAM");
+                } else if (symbol == NonTerminalSymbol.REST_ARGS && i == 2) {
+                    inserted = symbolTable.put(lexeme, lastEvaluatedType, "PARAM");
+                } else if (symbol == NonTerminalSymbol.VARS_THEN_CMDS) {
+                    if (chosenRule.get(0) == TerminalSymbol.INT_TYPE && i == 2) {
+                        inserted = symbolTable.put(lexeme, lastEvaluatedType, "VAR");
+                    } else if (chosenRule.get(0) == TerminalSymbol.BOOLEAN_TYPE && i == 1) {
+                        inserted = symbolTable.put(lexeme, "boolean", "VAR");
+                    }
+                }
             }
         }
     }
@@ -174,8 +242,11 @@ public class Parser {
                     t.line(),
                     t.column()
             );
-            if (expected == TerminalSymbol.SEMI_COLON) {
-                errorMessage += ". Did you perhaps forget a semi-colon?";
+            if (showSuggestions) {
+                errorMessage += "\n  -> Suggestion: Replace '" + lexeme + "' with a valid " + expected.name() + " token.";
+                if (expected == TerminalSymbol.SEMI_COLON) {
+                    errorMessage += " Did you forget a semi-colon at the end of the previous statement?";
+                }
             }
              throw new RuntimeException(errorMessage);
         }
