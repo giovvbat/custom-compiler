@@ -144,58 +144,89 @@ public class Grammar {
                 List.of(NonTerminalSymbol.EMPTY)
         ));
 
-        // EXP -> BASE_EXP EXP_REST
-        rules.put(NonTerminalSymbol.EXP, List.of(
-                List.of(NonTerminalSymbol.BASE_EXP, NonTerminalSymbol.EXP_REST)
+        // EXP -> AND_EXP
+        rules.put(NonTerminalSymbol.EXP, List.of(List.of(NonTerminalSymbol.AND_EXP)));
+
+        // AND_EXP -> REL_EXP AND_EXP_REST
+        rules.put(NonTerminalSymbol.AND_EXP, List.of(List.of(NonTerminalSymbol.REL_EXP, NonTerminalSymbol.AND_EXP_REST)));
+
+        // AND_EXP_REST -> '&&' REL_EXP AND_EXP_REST | EMPTY
+        rules.put(NonTerminalSymbol.AND_EXP_REST, List.of(
+                List.of(TerminalSymbol.AND, NonTerminalSymbol.REL_EXP, NonTerminalSymbol.AND_EXP_REST),
+                List.of(NonTerminalSymbol.EMPTY)
         ));
 
-        // BASE_EXP -> 'new' NEW_REST | '!' EXP | '(' EXP ')' | 'true' | 'false' | Id | Number | 'this'
-        rules.put(NonTerminalSymbol.BASE_EXP, List.of(
-                List.of(TerminalSymbol.NEW, NonTerminalSymbol.NEW_REST),
-                List.of(TerminalSymbol.NOT, NonTerminalSymbol.EXP),
+        // REL_EXP -> ADD_EXP REL_EXP_REST
+        rules.put(NonTerminalSymbol.REL_EXP, List.of(List.of(NonTerminalSymbol.ADD_EXP, NonTerminalSymbol.REL_EXP_REST)));
+
+        // REL_EXP_REST -> '<' ADD_EXP REL_EXP_REST | EMPTY
+        rules.put(NonTerminalSymbol.REL_EXP_REST, List.of(
+                List.of(TerminalSymbol.LESS, NonTerminalSymbol.ADD_EXP, NonTerminalSymbol.REL_EXP_REST),
+                List.of(NonTerminalSymbol.EMPTY)
+        ));
+
+        // ADD_EXP -> MUL_EXP ADD_EXP_REST
+        rules.put(NonTerminalSymbol.ADD_EXP, List.of(List.of(NonTerminalSymbol.MUL_EXP, NonTerminalSymbol.ADD_EXP_REST)));
+
+        // ADD_EXP_REST -> '+' MUL_EXP ADD_EXP_REST | '-' MUL_EXP ADD_EXP_REST | EMPTY
+        rules.put(NonTerminalSymbol.ADD_EXP_REST, List.of(
+                List.of(TerminalSymbol.PLUS, NonTerminalSymbol.MUL_EXP, NonTerminalSymbol.ADD_EXP_REST),
+                List.of(TerminalSymbol.MINUS, NonTerminalSymbol.MUL_EXP, NonTerminalSymbol.ADD_EXP_REST),
+                List.of(NonTerminalSymbol.EMPTY)
+        ));
+
+        // MUL_EXP -> UN_EXP MUL_EXP_REST
+        rules.put(NonTerminalSymbol.MUL_EXP, List.of(List.of(NonTerminalSymbol.UN_EXP, NonTerminalSymbol.MUL_EXP_REST)));
+
+        // MUL_EXP_REST -> '*' UN_EXP MUL_EXP_REST | EMPTY
+        rules.put(NonTerminalSymbol.MUL_EXP_REST, List.of(
+                List.of(TerminalSymbol.MULTIPLY, NonTerminalSymbol.UN_EXP, NonTerminalSymbol.MUL_EXP_REST),
+                List.of(NonTerminalSymbol.EMPTY)
+        ));
+
+        // UN_EXP -> '!' UN_EXP | PSF_EXP
+        rules.put(NonTerminalSymbol.UN_EXP, List.of(
+                List.of(TerminalSymbol.NOT, NonTerminalSymbol.UN_EXP),
+                List.of(NonTerminalSymbol.PSF_EXP)
+        ));
+
+        // PSF_EXP -> PRI_EXP PSF_EXP_REST
+        rules.put(NonTerminalSymbol.PSF_EXP, List.of(List.of(NonTerminalSymbol.PRI_EXP, NonTerminalSymbol.PSF_EXP_REST)));
+
+        // PSF_EXP_REST -> '[' EXP ']' PSF_EXP_REST | '.' DOT_REST | EMPTY
+        rules.put(NonTerminalSymbol.PSF_EXP_REST, List.of(
+                List.of(TerminalSymbol.SQUARE_BRACKET_LEFT, NonTerminalSymbol.EXP, TerminalSymbol.SQUARE_BRACKET_RIGHT, NonTerminalSymbol.PSF_EXP_REST),
+                List.of(TerminalSymbol.DOT, NonTerminalSymbol.DOT_REST),
+                List.of(NonTerminalSymbol.EMPTY)
+        ));
+
+        // DOT_REST -> 'length' PSF_EXP_REST | Id '(' L_EXP ')' PSF_EXP_REST
+        rules.put(NonTerminalSymbol.DOT_REST, List.of(
+                List.of(TerminalSymbol.LENGTH, NonTerminalSymbol.PSF_EXP_REST),
+                List.of(TerminalSymbol.ID, TerminalSymbol.PAREN_LEFT, NonTerminalSymbol.L_EXP, TerminalSymbol.PAREN_RIGHT, NonTerminalSymbol.PSF_EXP_REST)
+        ));
+
+        // PRI_EXP -> '(' EXP ')' | 'true' | 'false' | Id | Number | 'this' | 'new' Id '(' ')' | 'new' 'int' '[' EXP ']'
+        rules.put(NonTerminalSymbol.PRI_EXP, List.of(
                 List.of(TerminalSymbol.PAREN_LEFT, NonTerminalSymbol.EXP, TerminalSymbol.PAREN_RIGHT),
                 List.of(TerminalSymbol.TRUE),
                 List.of(TerminalSymbol.FALSE),
                 List.of(TerminalSymbol.ID),
                 List.of(TerminalSymbol.NUMBER),
-                List.of(TerminalSymbol.THIS)
+                List.of(TerminalSymbol.THIS),
+                List.of(TerminalSymbol.NEW, TerminalSymbol.ID, TerminalSymbol.PAREN_LEFT, TerminalSymbol.PAREN_RIGHT),
+                List.of(TerminalSymbol.NEW, TerminalSymbol.INT_TYPE, TerminalSymbol.SQUARE_BRACKET_LEFT, NonTerminalSymbol.EXP, TerminalSymbol.SQUARE_BRACKET_RIGHT)
         ));
 
-        // NEW_REST -> Id '(' ')' | 'int' '[' EXP ']'
-        rules.put(NonTerminalSymbol.NEW_REST, List.of(
-                List.of(TerminalSymbol.ID, TerminalSymbol.PAREN_LEFT, TerminalSymbol.PAREN_RIGHT),
-                List.of(TerminalSymbol.INT_TYPE, TerminalSymbol.SQUARE_BRACKET_LEFT, NonTerminalSymbol.EXP, TerminalSymbol.SQUARE_BRACKET_RIGHT)
-        ));
-
-        // EXP_REST -> '&&' EXP | '>' EXP | '+' EXP | '-' EXP | '*' EXP | '[' EXP ']' EXP_REST | '.' DOT_REST EXP_REST | EMPTY
-        rules.put(NonTerminalSymbol.EXP_REST, List.of(
-                List.of(TerminalSymbol.AND, NonTerminalSymbol.EXP),
-                List.of(TerminalSymbol.GREATER, NonTerminalSymbol.EXP),
-                List.of(TerminalSymbol.PLUS, NonTerminalSymbol.EXP),
-                List.of(TerminalSymbol.MINUS, NonTerminalSymbol.EXP),
-                List.of(TerminalSymbol.MULTIPLY, NonTerminalSymbol.EXP),
-
-                List.of(TerminalSymbol.SQUARE_BRACKET_LEFT, NonTerminalSymbol.EXP, TerminalSymbol.SQUARE_BRACKET_RIGHT, NonTerminalSymbol.EXP_REST),
-                List.of(TerminalSymbol.DOT, NonTerminalSymbol.DOT_REST, NonTerminalSymbol.EXP_REST),
-
+        // L_EXP -> EXP L_EXP_REST | EMPTY
+        rules.put(NonTerminalSymbol.L_EXP, List.of(
+                List.of(NonTerminalSymbol.EXP, NonTerminalSymbol.L_EXP_REST),
                 List.of(NonTerminalSymbol.EMPTY)
         ));
 
-        // DOT_REST -> 'length' | Id '(' LIST_EXP ')'
-        rules.put(NonTerminalSymbol.DOT_REST, List.of(
-                List.of(TerminalSymbol.LENGTH),
-                List.of(TerminalSymbol.ID, TerminalSymbol.PAREN_LEFT, NonTerminalSymbol.LIST_EXP, TerminalSymbol.PAREN_RIGHT)
-        ));
-
-        // LIST_EXP -> EXP REST_LIST_EXP | EMPTY
-        rules.put(NonTerminalSymbol.LIST_EXP, List.of(
-                List.of(NonTerminalSymbol.EXP, NonTerminalSymbol.REST_LIST_EXP),
-                List.of(NonTerminalSymbol.EMPTY)
-        ));
-
-        // REST_LIST_EXP -> ',' EXP REST_LIST_EXP | EMPTY
-        rules.put(NonTerminalSymbol.REST_LIST_EXP, List.of(
-                List.of(TerminalSymbol.COMMA, NonTerminalSymbol.EXP, NonTerminalSymbol.REST_LIST_EXP),
+        // L_EXP_REST -> ',' EXP L_EXP_REST | EMPTY
+        rules.put(NonTerminalSymbol.L_EXP_REST, List.of(
+                List.of(TerminalSymbol.COMMA, NonTerminalSymbol.EXP, NonTerminalSymbol.L_EXP_REST),
                 List.of(NonTerminalSymbol.EMPTY)
         ));
 

@@ -22,15 +22,6 @@ public enum NonTerminalSymbol implements Symbol {
     DEF_VAR,
     DEF_MET,
 
-    // expressions
-    EXP,
-    BASE_EXP,
-    NEW_REST,
-    EXP_REST,
-    DOT_REST,
-    LIST_EXP,
-    REST_LIST_EXP,
-
     //Para fatoração à esquerda
     DEF_CL_REST,
     DEF_MET_REST,
@@ -40,4 +31,22 @@ public enum NonTerminalSymbol implements Symbol {
     VARS_THEN_CMDS,
     ID_START_REST,
     NON_ID_CMD,
+
+    EXP,
+    AND_EXP,
+    AND_EXP_REST,
+    REL_EXP,
+    REL_EXP_REST,
+    ADD_EXP,
+    ADD_EXP_REST,
+    MUL_EXP,
+    MUL_EXP_REST,
+    UN_EXP,
+    PSF_EXP,
+    PSF_EXP_REST,
+    PRI_EXP,
+    L_EXP,
+    L_EXP_REST,
+    DOT_REST,
+
 }

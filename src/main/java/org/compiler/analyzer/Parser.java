@@ -2,6 +2,7 @@ package org.compiler.analyzer;
 
 import org.compiler.domain.Grammar;
 import org.compiler.domain.Symbol;
+import org.compiler.domain.ParseTree;
 import org.compiler.enums.NonTerminalSymbol;
 import org.compiler.enums.TerminalSymbol;
 import org.compiler.domain.Token;
@@ -21,17 +22,18 @@ public class Parser {
     private static boolean showSuggestions;
     public static SymbolTable symbolTable;
 
-    public static void parse(List<Token> tokens, boolean suggestionsFlag) {
+    public static ParseTree parse(List<Token> tokens, boolean suggestionsFlag) {
         Parser.tokens = tokens;
         Parser.grammar = new Grammar();
         Parser.current = 0;
         Parser.showSuggestions = suggestionsFlag;
         Parser.symbolTable = new SymbolTable();
 
-        execute(NonTerminalSymbol.PROG, EnumSet.noneOf(TerminalSymbol.class));
+        ParseTree root = execute(NonTerminalSymbol.PROG, EnumSet.noneOf(TerminalSymbol.class));
 
         if (isAtEnd()) {
             System.out.println("success: code is lexically and syntactically correct!");
+            return root;
         } else {
             Token t = tokens.get(current);
             throw new RuntimeException(String.format(
@@ -43,7 +45,7 @@ public class Parser {
         }
     }
 
-    private static void execute(NonTerminalSymbol symbol, Set<TerminalSymbol> localFollowers) {
+    private static ParseTree execute(NonTerminalSymbol symbol, Set<TerminalSymbol> localFollowers) {
         List<List<Symbol>> rules = grammar.getRules().get(symbol);
 
         TerminalSymbol lookahead = isAtEnd() ? null : tokens.get(current).type();
@@ -69,7 +71,7 @@ public class Parser {
                     lexeme, t.line(), t.column(), expectedList
             ));
         }
-
+        ParseTree node = new ParseTree(symbol, null);
         for (int i = 0; i < chosenRule.size(); i++) {
             Symbol s = chosenRule.get(i);
 
@@ -100,7 +102,9 @@ public class Parser {
             int startTokenIdx = current;
 
             if (s instanceof TerminalSymbol) {
+                Token t = isAtEnd() ? tokens.get(tokens.size() - 1) : tokens.get(current);
                 match((TerminalSymbol) s);
+                node.children.add(new ParseTree(s, t));
             } else {
                 Set<TerminalSymbol> nextFollowers = EnumSet.noneOf(TerminalSymbol.class);
                 boolean allDeriveEmpty = true;
@@ -115,7 +119,10 @@ public class Parser {
                 if (allDeriveEmpty) {
                     nextFollowers.addAll(localFollowers);
                 }
-                execute((NonTerminalSymbol) s, nextFollowers);
+                ParseTree child = execute((NonTerminalSymbol) s, nextFollowers);
+                if(child != null){
+                    node.children.add(child);
+                }
             }
             if (closeScope) symbolTable.exitScope();
 
@@ -154,6 +161,7 @@ public class Parser {
                 }
             }
         }
+        return node;
     }
     private static List<Symbol> predictRule(NonTerminalSymbol symbol ,List<List<Symbol>> rules, TerminalSymbol lookahead,
                                             Set<TerminalSymbol> localFollowers){
