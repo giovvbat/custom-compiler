@@ -10,12 +10,10 @@ import java.util.List;
 
 public class ASTPrinter {
 
-    // Main entry point
     public static void print(Node node) {
         print(node, "", true);
     }
 
-    // Recursive tree drawer
     private static void print(Node node, String prefix, boolean isTail) {
         if (node == null) return;
 
@@ -30,7 +28,6 @@ public class ASTPrinter {
         }
     }
 
-
     private static String getNodeString(Node node) {
         if (node instanceof Statements.Seq) return "Block (Seq)";
         if (node instanceof Statements.If) return "If";
@@ -39,8 +36,9 @@ public class ASTPrinter {
         if (node instanceof Statements.ArrayAssign a) return "ArrayAssign: " + a.id;
         if (node instanceof Statements.Print) return "Print";
         if (node instanceof Structure.Program) return "Program";
-        if (node instanceof Structure.ClassNode c) return "Class: " + c.name;
-        if (node instanceof Structure.MethodNode m) return "Method: " + m.name;
+        if (node instanceof Structure.ClassNode c) return "Class: " + c.name + (c.parentName != null ? " (extends " + c.parentName + ")" : "");
+        if (node instanceof Structure.MethodNode m) return "Method: " + m.name + " -> " + m.returnType;
+        if (node instanceof Structure.FieldNode f) return "Variable/Field: " + f.type + " " + f.name;
 
         if (node instanceof Expressions.Ari a) return "AriOp '" + a.op + "'";
         if (node instanceof Expressions.Rel r) return "RelOp '" + r.op + "'";
@@ -57,26 +55,26 @@ public class ASTPrinter {
         if (node instanceof Expressions.This) return "This";
         if (node instanceof Statements.Return) return "Return";
 
-
         return node.getClass().getSimpleName();
     }
-
 
     private static List<Node> getChildren(Node node) {
         List<Node> children = new ArrayList<>();
 
         if (node instanceof Structure.Program p) children.addAll(p.classes);
-        else if (node instanceof Structure.ClassNode c) children.addAll(c.methods);
-
+        else if (node instanceof Structure.ClassNode c) {
+            children.addAll(c.fields);
+            children.addAll(c.methods);
+        }
         else if (node instanceof Structure.MethodNode m) {
+            children.addAll(m.params);
+            children.addAll(m.localVars);
             if (m.body != null) children.add(m.body);
             if (m.returnExp != null) children.add(new Statements.Return(m.returnExp));
         }
-
         else if (node instanceof Statements.Seq s) {
             if (s.stmts != null) children.addAll(s.stmts);
         }
-
         else if (node instanceof Statements.If i) {
             if (i.cond != null) children.add(i.cond);
             if (i.thenStmt != null) children.add(i.thenStmt);
