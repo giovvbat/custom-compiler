@@ -26,7 +26,7 @@ public class SemanticAnalyzer {
     private static String fileName = "";
     private static Node currentContextNode = null;
 
-    public static void analyze(Structure.Program program, String file, boolean printSymbolTable, boolean showSuggestions) {
+    public static void analyze(Structure.Program program, String file, boolean showSuggestions) {
         classTable.clear();
         suggest = showSuggestions;
         fileName = file;
@@ -66,9 +66,18 @@ public class SemanticAnalyzer {
             }
             classTable.put(cNode.name, classData);
         }
-
-        if (printSymbolTable) {
-            printTable();
+        for (String className : classTable.keySet()) {
+            ClassData cd = classTable.get(className);
+            if (cd.parent != null && !classTable.containsKey(cd.parent)) {
+                throwError("class '" + className + "' extends undefined parent class '" + cd.parent + "'", null, "Ensure the parent class is defined.");
+            }
+            String currentParent = cd.parent;
+            while (currentParent != null) {
+                if (currentParent.equals(className)) {
+                    throwError("cyclic inheritance detected involving class '" + className + "'", null, "Classes cannot inherit from themselves.");
+                }
+                currentParent = classTable.get(currentParent).parent;
+            }
         }
 
         for (Structure.ClassNode cNode : program.classes) {
@@ -166,22 +175,6 @@ public class SemanticAnalyzer {
             return "return " + reconstruct(r.expr) + ";";
 
         return "";
-    }
-    private static void printTable() {
-        System.out.println("\n=== GLOBAL SYMBOL TABLE ===");
-        for (String cName : classTable.keySet()) {
-            ClassData cd = classTable.get(cName);
-            String parentStr = cd.parent != null ? " extends " + cd.parent : "";
-            System.out.println("Class: " + cName + parentStr);
-            for (String f : cd.fields.keySet()) System.out.println("  Attribute: " + cd.fields.get(f) + " " + f);
-            for (String m : cd.methods.keySet()) {
-                System.out.println("  Method: " + m + " -> " + cd.methods.get(m).returnType);
-                MethodData md = cd.methods.get(m);
-                for (String p : md.params.keySet()) System.out.println("    Param: " + md.params.get(p) + " " + p);
-                for (String l : md.locals.keySet()) System.out.println("    Local: " + md.locals.get(l) + " " + l);
-            }
-        }
-        System.out.println("===========================\n");
     }
 
     private static void checkStmt(Stmt s) {

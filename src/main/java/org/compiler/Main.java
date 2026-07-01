@@ -45,6 +45,9 @@ public class Main {
 
             ParseTree cstRoot = Parser.parse(tokens, showSuggestions);
 
+            if (printSymTable) {
+                Parser.symbolTable.printTable();
+            }
             Node astRoot = ASTBuilder.build(cstRoot);
 
             if (printAST) {
@@ -53,7 +56,7 @@ public class Main {
             }
 
             // 4. Semantic Analysis & Symbol Table Output
-            SemanticAnalyzer.analyze((Structure.Program) astRoot, fileName, printSymTable, showSuggestions);
+            SemanticAnalyzer.analyze((Structure.Program) astRoot, fileName, showSuggestions);
         } catch (RuntimeException exception) {
             System.err.println(exception.getMessage());
         }
