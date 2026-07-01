@@ -1,9 +1,8 @@
 package org.compiler.semantic;
 
 import org.compiler.ast.*;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.LinkedHashMap;
+
+import java.util.*;
 
 public class SemanticAnalyzer {
 
@@ -68,15 +67,39 @@ public class SemanticAnalyzer {
         }
         for (String className : classTable.keySet()) {
             ClassData cd = classTable.get(className);
-            if (cd.parent != null && !classTable.containsKey(cd.parent)) {
-                throwError("class '" + className + "' extends undefined parent class '" + cd.parent + "'", null, "Ensure the parent class is defined.");
-            }
-            String currentParent = cd.parent;
-            while (currentParent != null) {
-                if (currentParent.equals(className)) {
-                    throwError("cyclic inheritance detected involving class '" + className + "'", null, "Classes cannot inherit from themselves.");
+            if (cd.parent != null && classTable.containsKey(cd.parent)) {
+                for (String methodName : cd.methods.keySet()) {
+                    MethodData localMethod = cd.methods.get(methodName);
+
+                    String currParent = cd.parent;
+                    while (currParent != null && classTable.containsKey(currParent)) {
+                        ClassData parentData = classTable.get(currParent);
+
+                        if (parentData.methods.containsKey(methodName)) {
+                            MethodData parentMethod = parentData.methods.get(methodName);
+
+
+                            if (!localMethod.returnType.equals(parentMethod.returnType)) {
+                                throwError("invalid method override: return type '" + localMethod.returnType +
+                                        "' does not match parent type '" + parentMethod.returnType + "' in method '" + methodName + "'", null, "Overridden methods must have the exact same return type.");
+                            }
+
+                            if (localMethod.params.size() != parentMethod.params.size()) {
+                                throwError("invalid method override: method '" + methodName + "' has different number of parameters than parent", null, "Overridden methods must have the same arguments.");
+                            }
+
+                            List<String> localParamTypes = new ArrayList<>(localMethod.params.values());
+                            List<String> parentParamTypes = new ArrayList<>(parentMethod.params.values());
+                            for (int i = 0; i < localParamTypes.size(); i++) {
+                                if (!localParamTypes.get(i).equals(parentParamTypes.get(i))) {
+                                    throwError("invalid method override: parameter type mismatch in method '" + methodName + "'", null, "Overridden methods must have identical parameter types.");
+                                }
+                            }
+                            break;
+                        }
+                        currParent = parentData.parent;
+                    }
                 }
-                currentParent = classTable.get(currentParent).parent;
             }
         }
 
