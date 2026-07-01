@@ -1,10 +1,7 @@
 package org.compiler.semantic;
 import com.sun.jdi.ArrayReference;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class SymbolTable {
 
@@ -17,13 +14,17 @@ public class SymbolTable {
 
     }
     private final Deque<Map<String, Entry>> scopes;
+    private final List<Map<String, Entry>> allScopesHistory;
 
     public SymbolTable(){
+        this.allScopesHistory = new ArrayList<>();
         this.scopes = new ArrayDeque<>();
         enterScope();
     }
     public void enterScope(){
-        scopes.push(new HashMap<>());
+        Map<String, Entry> newScope = new HashMap<>();
+        scopes.push(newScope);
+        allScopesHistory.add(newScope);
     }
     public void exitScope(){
         if(!scopes.isEmpty()){
@@ -49,7 +50,7 @@ public class SymbolTable {
     public void printTable(){
         System.out.println("\n ==== SYUMBOL TABLE ====");
         int level = scopes.size() - 1;
-        for (Map<String, Entry> scope: scopes){
+        for (Map<String, Entry> scope: allScopesHistory){
             System.out.println("Scope Level " + level + ": " + scope);
             level--;
         }
