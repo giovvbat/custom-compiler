@@ -2,6 +2,7 @@ package org.compiler.semantic;
 
 import org.compiler.domain.ParseTree;
 import org.compiler.domain.Symbol;
+import org.compiler.domain.Token;
 import org.compiler.enums.NonTerminalSymbol;
 import org.compiler.enums.TerminalSymbol;
 import org.compiler.ast.*;
@@ -17,12 +18,33 @@ public class ASTBuilder {
             List<Structure.ClassNode> classes = new ArrayList<>();
             classes.add(buildMainClass(cstNode.children.get(0))); // MAIN_C
             classes.addAll(buildClasses(cstNode.children.get(1))); // DEF_CL
-            return new Structure.Program(classes);
+            return withPos(new Structure.Program(classes), cstNode);
         }
         if (cstNode.symbol == NonTerminalSymbol.CMD) {
             return buildStmt(cstNode);
         } else if (cstNode.symbol == NonTerminalSymbol.EXP) {
             return buildExpr(cstNode);
+        }
+        return null;
+    }
+
+    private static <T extends Node> T withPos(T node, ParseTree pt) {
+        if (node != null && pt != null) {
+            Token t = findFirstToken(pt);
+            if (t != null) {
+                node.line = t.line();
+                node.column = t.column();
+            }
+        }
+        return node;
+    }
+
+    private static Token findFirstToken(ParseTree pt) {
+        if (pt == null) return null;
+        if (pt.token != null) return pt.token;
+        for (ParseTree child : pt.children) {
+            Token t = findFirstToken(child);
+            if (t != null) return t;
         }
         return null;
     }
@@ -67,10 +89,10 @@ public class ASTBuilder {
         List<Stmt> stmts = findStmts(cmdsNode);
 
         String argName = mainNode.children.get(9).token.lexeme();
-        List<Structure.FieldNode> params = List.of(new Structure.FieldNode("String[]", argName));
+        List<Structure.FieldNode> params = List.of(withPos(new Structure.FieldNode("String[]", argName), mainNode.children.get(9)));
 
-        Structure.MethodNode mainMethod = new Structure.MethodNode("void", "main", params, new ArrayList<>(), new Statements.Seq(stmts), null);
-        return new Structure.ClassNode(name, null, new ArrayList<>(), List.of(mainMethod));
+        Structure.MethodNode mainMethod = withPos(new Structure.MethodNode("void", "main", params, new ArrayList<>(), withPos(new Statements.Seq(stmts), cmdsNode), null), mainNode);
+        return withPos(new Structure.ClassNode(name, null, new ArrayList<>(), List.of(mainMethod)), mainNode);
     }
 
     private static List<Structure.ClassNode> buildClasses(ParseTree defClNode) {
@@ -90,7 +112,7 @@ public class ASTBuilder {
         List<Structure.FieldNode> fields = buildFields(varsNode);
         List<Structure.MethodNode> methods = buildMethods(methodsNode);
 
-        classes.add(new Structure.ClassNode(name, parentName, fields, methods));
+        classes.add(withPos(new Structure.ClassNode(name, parentName, fields, methods), defClNode));
         classes.addAll(buildClasses(nextClass));
         return classes;
     }
@@ -98,7 +120,7 @@ public class ASTBuilder {
     private static List<Structure.FieldNode> buildFields(ParseTree defVarNode) {
         List<Structure.FieldNode> fields = new ArrayList<>();
         while (defVarNode != null && !defVarNode.children.isEmpty() && defVarNode.children.get(0).symbol != NonTerminalSymbol.EMPTY) {
-            fields.add(new Structure.FieldNode(getTypeString(defVarNode.children.get(0)), defVarNode.children.get(1).token.lexeme()));
+            fields.add(withPos(new Structure.FieldNode(getTypeString(defVarNode.children.get(0)), defVarNode.children.get(1).token.lexeme()), defVarNode));
             defVarNode = defVarNode.children.get(3);
         }
         return fields;
@@ -119,7 +141,7 @@ public class ASTBuilder {
         List<Stmt> stmts = findStmts(varsNode);
         Expr returnExp = buildExpr(expNode);
 
-        methods.add(new Structure.MethodNode(returnType, name, params, locals, new Statements.Seq(stmts), returnExp));
+        methods.add(withPos(new Structure.MethodNode(returnType, name, params, locals, withPos(new Statements.Seq(stmts), varsNode), returnExp), defMetNode));
         methods.addAll(buildMethods(defMetNode.children.get(12)));
         return methods;
     }
@@ -127,10 +149,10 @@ public class ASTBuilder {
     private static List<Structure.FieldNode> buildArgs(ParseTree argsNode) {
         List<Structure.FieldNode> params = new ArrayList<>();
         if (argsNode.children.isEmpty() || argsNode.children.get(0).symbol == NonTerminalSymbol.EMPTY) return params;
-        params.add(new Structure.FieldNode(getTypeString(argsNode.children.get(0)), argsNode.children.get(1).token.lexeme()));
+        params.add(withPos(new Structure.FieldNode(getTypeString(argsNode.children.get(0)), argsNode.children.get(1).token.lexeme()), argsNode));
         ParseTree rest = argsNode.children.get(2);
         while (!rest.children.isEmpty() && rest.children.get(0).symbol != NonTerminalSymbol.EMPTY) {
-            params.add(new Structure.FieldNode(getTypeString(rest.children.get(1)), rest.children.get(2).token.lexeme()));
+            params.add(withPos(new Structure.FieldNode(getTypeString(rest.children.get(1)), rest.children.get(2).token.lexeme()), rest));
             rest = rest.children.get(3);
         }
         return params;
@@ -143,11 +165,21 @@ public class ASTBuilder {
             Symbol first = curr.children.get(0).symbol;
             if (first == TerminalSymbol.INT_TYPE) {
                 String type = curr.children.get(1).children.isEmpty() || curr.children.get(1).children.get(0).symbol == NonTerminalSymbol.EMPTY ? "int" : "int[]";
-                locals.add(new Structure.FieldNode(type, curr.children.get(2).token.lexeme()));
+                locals.add(withPos(new Structure.FieldNode(type, curr.children.get(2).token.lexeme()), curr));
                 curr = curr.children.get(4);
             } else if (first == TerminalSymbol.BOOLEAN_TYPE) {
-                locals.add(new Structure.FieldNode("boolean", curr.children.get(1).token.lexeme()));
+                locals.add(withPos(new Structure.FieldNode("boolean", curr.children.get(1).token.lexeme()), curr));
                 curr = curr.children.get(3);
+            } else if (first == TerminalSymbol.ID) {
+                ParseTree idStartRest = curr.children.get(1);
+                if (idStartRest.children.get(0).symbol == TerminalSymbol.ID) {
+                    String type = curr.children.get(0).token.lexeme();
+                    String name = idStartRest.children.get(0).token.lexeme();
+                    locals.add(withPos(new Structure.FieldNode(type, name), curr));
+                    curr = idStartRest.children.get(2);
+                } else {
+                    break;
+                }
             } else {
                 break;
             }
@@ -181,9 +213,9 @@ public class ASTBuilder {
                 if (firstRest.symbol == NonTerminalSymbol.CMD_ID_REST) {
                     ParseTree cmdIdRestFirst = firstRest.children.get(0);
                     if (cmdIdRestFirst.symbol == TerminalSymbol.EQUALS) {
-                        stmts.add(new Statements.Assign(id, buildExpr(firstRest.children.get(1))));
+                        stmts.add(withPos(new Statements.Assign(id, buildExpr(firstRest.children.get(1))), firstChild));
                     } else {
-                        stmts.add(new Statements.ArrayAssign(id, buildExpr(firstRest.children.get(1)), buildExpr(firstRest.children.get(4))));
+                        stmts.add(withPos(new Statements.ArrayAssign(id, buildExpr(firstRest.children.get(1)), buildExpr(firstRest.children.get(4))), firstChild));
                     }
                     stmts.addAll(findStmts(idStartRest.children.get(1)));
                 }
@@ -205,22 +237,22 @@ public class ASTBuilder {
         ParseTree firstChild = cmdNode.children.get(0);
 
         if (firstChild.symbol == TerminalSymbol.CURLY_BRACKET_LEFT) {
-            return new Statements.Seq(findStmts(cmdNode.children.get(1)));
+            return withPos(new Statements.Seq(findStmts(cmdNode.children.get(1))), cmdNode);
         }
         if (firstChild.symbol == TerminalSymbol.SYSTEM_OUT_PRINTLN) {
-            return new Statements.Print(buildExpr(cmdNode.children.get(2)));
+            return withPos(new Statements.Print(buildExpr(cmdNode.children.get(2))), cmdNode);
         }
         if (firstChild.symbol == TerminalSymbol.WHILE) {
             Expr cond = buildExpr(cmdNode.children.get(2));
             Stmt body = buildStmt(cmdNode.children.get(4));
-            return new Statements.While(cond, body);
+            return withPos(new Statements.While(cond, body), cmdNode);
         }
         if (firstChild.symbol == TerminalSymbol.IF) {
             Expr cond = buildExpr(cmdNode.children.get(2));
             Stmt thenStmt = buildStmt(cmdNode.children.get(4));
             ParseTree cmdIfRest = cmdNode.children.get(5);
             Stmt elseStmt = cmdIfRest.children.isEmpty() || cmdIfRest.children.get(0).symbol == NonTerminalSymbol.EMPTY ? null : buildStmt(cmdIfRest.children.get(1));
-            return new Statements.If(cond, thenStmt, elseStmt);
+            return withPos(new Statements.If(cond, thenStmt, elseStmt), cmdNode);
         }
         if (firstChild.symbol == TerminalSymbol.ID) {
             String id = firstChild.token.lexeme();
@@ -228,11 +260,11 @@ public class ASTBuilder {
             ParseTree firstRest = cmdIdRest.children.get(0);
 
             if (firstRest.symbol == TerminalSymbol.EQUALS) {
-                return new Statements.Assign(id, buildExpr(cmdIdRest.children.get(1)));
+                return withPos(new Statements.Assign(id, buildExpr(cmdIdRest.children.get(1))), cmdNode);
             } else if (firstRest.symbol == TerminalSymbol.SQUARE_BRACKET_LEFT) {
                 Expr index = buildExpr(cmdIdRest.children.get(1));
                 Expr value = buildExpr(cmdIdRest.children.get(4));
-                return new Statements.ArrayAssign(id, index, value);
+                return withPos(new Statements.ArrayAssign(id, index, value), cmdNode);
             }
         }
         return null;
@@ -249,7 +281,7 @@ public class ASTBuilder {
     private static Expr chainAndExp(Expr left, ParseTree restNode) {
         if (restNode.children.isEmpty() || restNode.children.get(0).symbol == NonTerminalSymbol.EMPTY) return left;
         Expr right = buildRelExp(restNode.children.get(1));
-        Expr newLeft = new Expressions.Logical("&&", left, right);
+        Expr newLeft = withPos(new Expressions.Logical("&&", left, right), restNode);
         return chainAndExp(newLeft, restNode.children.get(2));
     }
 
@@ -260,7 +292,7 @@ public class ASTBuilder {
     private static Expr chainRelExp(Expr left, ParseTree restNode) {
         if (restNode.children.isEmpty() || restNode.children.get(0).symbol == NonTerminalSymbol.EMPTY) return left;
         Expr right = buildAddExp(restNode.children.get(1));
-        Expr newLeft = new Expressions.Rel("<", left, right);
+        Expr newLeft = withPos(new Expressions.Rel("<", left, right), restNode);
         return chainRelExp(newLeft, restNode.children.get(2));
     }
 
@@ -271,7 +303,7 @@ public class ASTBuilder {
         while (!restNode.children.isEmpty() && restNode.children.get(0).symbol != NonTerminalSymbol.EMPTY) {
             String op = restNode.children.get(0).token.lexeme();
             Expr right = buildMulExp(restNode.children.get(1));
-            left = new Expressions.Ari(op, left, right);
+            left = withPos(new Expressions.Ari(op, left, right), restNode);
             restNode = restNode.children.get(2);
         }
         return left;
@@ -284,13 +316,13 @@ public class ASTBuilder {
     private static Expr chainMulExp(Expr left, ParseTree restNode) {
         if (restNode.children.isEmpty() || restNode.children.get(0).symbol == NonTerminalSymbol.EMPTY) return left;
         Expr right = buildUnExp(restNode.children.get(1));
-        Expr newLeft = new Expressions.Ari("*", left, right);
+        Expr newLeft = withPos(new Expressions.Ari("*", left, right), restNode);
         return chainMulExp(newLeft, restNode.children.get(2));
     }
 
     private static Expr buildUnExp(ParseTree node) {
         if (node.children.get(0).symbol == TerminalSymbol.NOT) {
-            return new Expressions.Not(buildUnExp(node.children.get(1)));
+            return withPos(new Expressions.Not(buildUnExp(node.children.get(1))), node);
         }
         return buildPsfExp(node.children.get(0));
     }
@@ -307,7 +339,7 @@ public class ASTBuilder {
 
         if (firstToken.symbol == TerminalSymbol.SQUARE_BRACKET_LEFT) {
             Expr index = buildExpr(restNode.children.get(1));
-            newLeft = new Expressions.ArrayAccess(left, index);
+            newLeft = withPos(new Expressions.ArrayAccess(left, index), restNode);
             return chainPsfExp(newLeft, restNode.children.get(3));
 
         } else if (firstToken.symbol == TerminalSymbol.DOT) {
@@ -315,12 +347,12 @@ public class ASTBuilder {
             ParseTree firstDotChild = dotRest.children.get(0);
 
             if (firstDotChild.symbol == TerminalSymbol.LENGTH) {
-                newLeft = new Expressions.ArrayLength(left);
+                newLeft = withPos(new Expressions.ArrayLength(left), dotRest);
                 return chainPsfExp(newLeft, dotRest.children.get(1));
             } else {
                 String methodName = firstDotChild.token.lexeme();
                 List<Expr> args = buildLExp(dotRest.children.get(2));
-                newLeft = new Expressions.MethodCall(left, methodName, args);
+                newLeft = withPos(new Expressions.MethodCall(left, methodName, args), dotRest);
                 return chainPsfExp(newLeft, dotRest.children.get(4));
             }
         }
@@ -331,18 +363,18 @@ public class ASTBuilder {
         ParseTree firstChild = node.children.get(0);
 
         if (firstChild.symbol == TerminalSymbol.PAREN_LEFT) return buildExpr(node.children.get(1));
-        if (firstChild.symbol == TerminalSymbol.NUMBER) return new Expressions.Num(Integer.parseInt(firstChild.token.lexeme()));
-        if (firstChild.symbol == TerminalSymbol.ID) return new Expressions.IdNode(firstChild.token.lexeme());
-        if (firstChild.symbol == TerminalSymbol.TRUE) return new Expressions.BoolLit(true);
-        if (firstChild.symbol == TerminalSymbol.FALSE) return new Expressions.BoolLit(false);
-        if (firstChild.symbol == TerminalSymbol.THIS) return new Expressions.This();
+        if (firstChild.symbol == TerminalSymbol.NUMBER) return withPos(new Expressions.Num(Integer.parseInt(firstChild.token.lexeme())), node);
+        if (firstChild.symbol == TerminalSymbol.ID) return withPos(new Expressions.IdNode(firstChild.token.lexeme()), node);
+        if (firstChild.symbol == TerminalSymbol.TRUE) return withPos(new Expressions.BoolLit(true), node);
+        if (firstChild.symbol == TerminalSymbol.FALSE) return withPos(new Expressions.BoolLit(false), node);
+        if (firstChild.symbol == TerminalSymbol.THIS) return withPos(new Expressions.This(), node);
 
         if (firstChild.symbol == TerminalSymbol.NEW) {
             ParseTree secondChild = node.children.get(1);
             if (secondChild.symbol == TerminalSymbol.ID) {
-                return new Expressions.NewObject(secondChild.token.lexeme());
+                return withPos(new Expressions.NewObject(secondChild.token.lexeme()), node);
             } else if (secondChild.symbol == TerminalSymbol.INT_TYPE) {
-                return new Expressions.NewArray(buildExpr(node.children.get(3)));
+                return withPos(new Expressions.NewArray(buildExpr(node.children.get(3))), node);
             }
         }
         return null;

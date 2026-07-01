@@ -13,7 +13,6 @@ import org.compiler.ast.Structure;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -28,7 +27,8 @@ public class Main {
         boolean printSymTable = argsList.contains("-symtable");
 
         try {
-            String input = Files.readString(Path.of(System.getProperty("user.dir"), "assets", "asset-1.ling"));
+            String fileName = "test.ling";
+            String input = Files.readString(Path.of(System.getProperty("user.dir"), "assets", fileName));
 
             List<Token> tokens = Lexer.tokenize(input, stopFirstError, showSuggestions);
 
@@ -53,8 +53,7 @@ public class Main {
             }
 
             // 4. Semantic Analysis & Symbol Table Output
-            SemanticAnalyzer.analyze((Structure.Program) astRoot, printSymTable);
-
+            SemanticAnalyzer.analyze((Structure.Program) astRoot, fileName, printSymTable, showSuggestions);
         } catch (RuntimeException exception) {
             System.err.println(exception.getMessage());
         }

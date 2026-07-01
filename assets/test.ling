@@ -1,0 +1,52 @@
+class TestBench {
+    public static void main(String[] args) {
+        System.out.println(new Test().trigger());
+    }
+}
+
+// class TestBench { }
+class Base {
+int a;
+}
+class Sub extends Base {
+int a;
+}
+
+class Test {
+    int number;
+    int[] arr;
+    Base baseObj;
+    Sub subObj;
+
+    // int number;
+
+    public int trigger() {
+        int d;
+        boolean flag;
+
+        // Test 1: Using an integer as an array
+        //number = 5;
+        //number[0] = 10;
+
+        // Test 2: Using the .length on a integer
+        //d = number.length;
+
+        // Test 3: conditional statement with an integer
+        // if (number) { d = 1; } else { d = 0; }
+
+        // Test 4: Logical operator on integers
+        //flag = (number < 10) && number;
+
+        // Test 5: Assigning a Superclass to a Subclass
+        //subObj = new Base();
+
+        // Test 6: Method argument type mismatch
+        //d = this.vemInt(flag);
+
+        return 0;
+    }
+
+    public int vemInt(int val) {
+        return val;
+    }
+}
