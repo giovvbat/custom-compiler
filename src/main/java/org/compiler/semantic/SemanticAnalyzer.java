@@ -105,9 +105,30 @@ public class SemanticAnalyzer {
 
         for (Structure.ClassNode cNode : program.classes) {
             currentClass = cNode.name;
+
+            for (Structure.FieldNode fNode : cNode.fields) {
+                if (!isValidType(fNode.type)) {
+                    throwError("unknown type '" + fNode.type + "' for field '" + fNode.name + "'", fNode, "Ensure the type is a primitive or defined class.");
+                }
+            }
+
             for (Structure.MethodNode mNode : cNode.methods) {
                 currentMethod = mNode.name;
+                if (!isValidType(mNode.returnType)) {
+                    throwError("unknown return type '" + mNode.returnType + "' for method '" + mNode.name + "'", mNode, "Ensure the return type exists.");
+                }
 
+                for (Structure.FieldNode pNode : mNode.params) {
+                    if (!isValidType(pNode.type)) {
+                        throwError("unknown type '" + pNode.type + "' for parameter '" + pNode.name + "'", pNode, "Ensure the parameter type exists.");
+                    }
+                }
+
+                for (Structure.FieldNode lNode : mNode.localVars) {
+                    if (!isValidType(lNode.type)) {
+                        throwError("unknown type '" + lNode.type + "' for local variable '" + lNode.name + "'", lNode, "Ensure the local variable type exists.");
+                    }
+                }
                 if (mNode.body != null) checkStmt(mNode.body);
 
                 if (mNode.returnExp != null) {
@@ -122,6 +143,13 @@ public class SemanticAnalyzer {
             }
         }
         System.out.println("success: code is semantically correct!");
+    }
+    private static boolean isValidType(String type){
+        if (type.equals("int") || type.equals("boolean") || type.equals("int[]") ||
+                type.equals("void") || type.equals("String[]")) {
+            return true;
+        }
+        return classTable.containsKey(type);
     }
 
     private static void throwError(String message, Node node, String suggestion) {
