@@ -55,7 +55,6 @@ public class Main {
                 ASTPrinter.print(astRoot);
             }
 
-            // 4. Semantic Analysis & Symbol Table Output
             SemanticAnalyzer.analyze((Structure.Program) astRoot, fileName, showSuggestions);
         } catch (RuntimeException exception) {
             System.err.println(exception.getMessage());
