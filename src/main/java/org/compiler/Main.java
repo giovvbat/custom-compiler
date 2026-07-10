@@ -9,6 +9,8 @@ import org.compiler.semantic.ASTPrinter;
 import org.compiler.semantic.SemanticAnalyzer;
 import org.compiler.ast.Node;
 import org.compiler.ast.Structure;
+import org.compiler.codegen.CodeGenerator;
+import org.compiler.codegen.Instruction3AC;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -25,6 +27,7 @@ public class Main {
         boolean showSuggestions = argsList.contains("-suggestions");
         boolean printAST = argsList.contains("-ast");
         boolean printSymTable = argsList.contains("-symtable");
+        boolean print3AC = argsList.contains("-3ac");
 
         try {
             String fileName = "test.ling";
@@ -56,6 +59,21 @@ public class Main {
             }
 
             SemanticAnalyzer.analyze((Structure.Program) astRoot, fileName, showSuggestions);
+
+
+            if (print3AC) {
+                System.out.println("\n=== CÓDIGO DE TRÊS ENDEREÇOS (3AC) ===");
+                CodeGenerator generator = new CodeGenerator();
+                List<Instruction3AC> intermediateCode = generator.generate((Structure.Program) astRoot);
+
+                for (Instruction3AC instr : intermediateCode) {
+                    if (instr.op.equals("LABEL") || instr.op.isEmpty()) {
+                        System.out.println(instr);
+                    } else {
+                        System.out.println("    " + instr);
+                    }
+                }
+            }
         } catch (RuntimeException exception) {
             System.err.println(exception.getMessage());
         }
