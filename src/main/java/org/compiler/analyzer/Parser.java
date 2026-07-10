@@ -9,7 +9,6 @@ import org.compiler.domain.Token;
 import java.util.EnumSet;
 import org.compiler.semantic.SymbolTable;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -17,7 +16,6 @@ public class Parser {
     private static List<Token> tokens;
     private static Grammar grammar;
     private static int current = 0;
-    private static int border = 0;
     private static String lastEvaluatedType = "";
     private static boolean showSuggestions;
     public static SymbolTable symbolTable;
@@ -136,27 +134,25 @@ public class Parser {
             }
             if (s == TerminalSymbol.ID && current > 0) {
                 String lexeme = tokens.get(current - 1).lexeme();
-                boolean inserted = true;
 
-                // Declarations
                 if (symbol == NonTerminalSymbol.MAIN_C) {
-                    if (i == 1) inserted = symbolTable.put(lexeme, "class", "CLASS");
-                    else if (i == 9) inserted = symbolTable.put(lexeme, "String[]", "PARAM");
+                    if (i == 1) symbolTable.put(lexeme, "class", "CLASS");
+                    else if (i == 9) symbolTable.put(lexeme, "String[]", "PARAM");
                 } else if (symbol == NonTerminalSymbol.DEF_CL && i == 1) {
-                    inserted = symbolTable.put(lexeme, "class", "CLASS");
+                    symbolTable.put(lexeme, "class", "CLASS");
                 } else if (symbol == NonTerminalSymbol.DEF_MET && i == 2) {
-                    inserted = symbolTable.put(lexeme, lastEvaluatedType, "METHOD");
+                    symbolTable.put(lexeme, lastEvaluatedType, "METHOD");
                 } else if (symbol == NonTerminalSymbol.DEF_VAR && i == 1) {
-                    inserted = symbolTable.put(lexeme, lastEvaluatedType, "VAR");
+                    symbolTable.put(lexeme, lastEvaluatedType, "VAR");
                 } else if (symbol == NonTerminalSymbol.ARGS && i == 1) {
-                    inserted = symbolTable.put(lexeme, lastEvaluatedType, "PARAM");
+                    symbolTable.put(lexeme, lastEvaluatedType, "PARAM");
                 } else if (symbol == NonTerminalSymbol.REST_ARGS && i == 2) {
-                    inserted = symbolTable.put(lexeme, lastEvaluatedType, "PARAM");
+                    symbolTable.put(lexeme, lastEvaluatedType, "PARAM");
                 } else if (symbol == NonTerminalSymbol.VARS_THEN_CMDS) {
                     if (chosenRule.get(0) == TerminalSymbol.INT_TYPE && i == 2) {
-                        inserted = symbolTable.put(lexeme, lastEvaluatedType, "VAR");
+                        symbolTable.put(lexeme, lastEvaluatedType, "VAR");
                     } else if (chosenRule.get(0) == TerminalSymbol.BOOLEAN_TYPE && i == 1) {
-                        inserted = symbolTable.put(lexeme, "boolean", "VAR");
+                        symbolTable.put(lexeme, "boolean", "VAR");
                     }
                 }
             }

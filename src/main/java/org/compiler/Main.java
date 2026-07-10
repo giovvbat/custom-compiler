@@ -7,6 +7,9 @@ import org.compiler.domain.Token;
 import org.compiler.semantic.ASTBuilder;
 import org.compiler.semantic.ASTPrinter;
 import org.compiler.semantic.SemanticAnalyzer;
+import org.compiler.semantic.SymbolTable;
+import org.compiler.codegen.CodeGenerator;
+import org.compiler.codegen.CodeList;
 import org.compiler.ast.Node;
 import org.compiler.ast.Structure;
 
@@ -25,6 +28,7 @@ public class Main {
         boolean showSuggestions = argsList.contains("-suggestions");
         boolean printAST = argsList.contains("-ast");
         boolean printSymTable = argsList.contains("-symtable");
+        boolean printCode = argsList.contains("-codegen");
 
         try {
             String fileName = "test.ling";
@@ -56,6 +60,15 @@ public class Main {
             }
 
             SemanticAnalyzer.analyze((Structure.Program) astRoot, fileName, showSuggestions);
+
+            SymbolTable irTable = new SymbolTable();
+            CodeGenerator generator = new CodeGenerator(irTable);
+            CodeList code = generator.generate((Structure.Program) astRoot);
+
+            if (printCode) {
+                System.out.println("\n=== THREE-ADDRESS CODE ===");
+                code.print();
+            }
         } catch (RuntimeException exception) {
             System.err.println(exception.getMessage());
         }
