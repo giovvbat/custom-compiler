@@ -1,0 +1,17 @@
+class MainErro {
+    public static void main(String[] args) {
+        System.out.println(new Verificador().verificar(7));
+    }
+}
+
+class Verificador {
+    public int verificar(int numero) {
+        boolean ativo ;
+        int resultado ;
+
+        ativo = numero < 10 ;
+        resultado = ativo + numero ;
+
+        return resultado ;
+    }
+}

@@ -1,0 +1,48 @@
+class MainCalc {
+    public static void main(String[] args) {
+        System.out.println(new Calculadora().calcular(5));
+    }
+}
+
+class Operacao {
+    public int base(int n) {
+        return n ;
+    }
+}
+
+class Calculadora extends Operacao {
+    int acumulador ;
+
+    public int base(int n) {
+        return n ;
+    }
+
+    public int calcular(int n) {
+        int i ;
+        int soma ;
+        boolean continua ;
+
+        soma = 0 ;
+        i = 1 ;
+        continua = true ;
+
+        while (i < n) {
+            if (soma < 100) {
+                soma = soma + i * 2 ;
+            } else {
+                soma = soma - i ;
+            }
+            i = i + 1 ;
+        }
+
+        continua = !(soma < 0) && (0 < soma) ;
+
+        if (continua) {
+            soma = soma + this.base(n) ;
+        } else {
+            soma = 0 ;
+        }
+
+        return soma ;
+    }
+}
