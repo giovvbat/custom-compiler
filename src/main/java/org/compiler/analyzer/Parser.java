@@ -165,15 +165,20 @@ public class Parser {
     }
     private static List<Symbol> predictRule(NonTerminalSymbol symbol ,List<List<Symbol>> rules, TerminalSymbol lookahead,
                                             Set<TerminalSymbol> localFollowers){
-        // Tenta achar a regra que starta com o lookahead
         if(lookahead != null){
             for(List<Symbol> rule : rules){
                 if (ruleStartsWith(rule, lookahead)) {
+
+                    if (lookahead == TerminalSymbol.NEW && rule.size() > 1 && (current + 1) < tokens.size()) {
+                        TerminalSymbol nextToken = tokens.get(current + 1).type();
+                        if (rule.get(1) == TerminalSymbol.ID && nextToken != TerminalSymbol.ID) continue;
+                        if (rule.get(1) == TerminalSymbol.INT_TYPE && nextToken != TerminalSymbol.INT_TYPE) continue;
+                    }
                     return rule;
                 }
             }
         }
-        // Se não tiver regra que case e a tenha uma transição vazia
+
         for (List<Symbol> rule : rules) {
             if (rule.isEmpty() || (rule.size() == 1 && rule.get(0) == NonTerminalSymbol.EMPTY)) {
                 boolean isExpressionTail = symbol.name().contains("EXP") || symbol.name().contains("REST");
@@ -182,7 +187,7 @@ public class Parser {
                 }
             }
         }
-        //erro de sintaxe
+
         return null;
     }
     private static boolean ruleStartsWith(List<Symbol> rule, TerminalSymbol lookahead){

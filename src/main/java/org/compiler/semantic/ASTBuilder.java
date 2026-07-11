@@ -218,6 +218,8 @@ public class ASTBuilder {
                         stmts.add(withPos(new Statements.ArrayAssign(id, buildExpr(firstRest.children.get(1)), buildExpr(firstRest.children.get(4))), firstChild));
                     }
                     stmts.addAll(findStmts(idStartRest.children.get(1)));
+                }else if (firstRest.symbol == TerminalSymbol.ID) {
+                    stmts.addAll(findStmts(idStartRest.children.get(2)));
                 }
             } else if (firstChild.symbol == NonTerminalSymbol.NON_ID_CMD) {
                 stmts.addAll(findStmts(firstChild));
