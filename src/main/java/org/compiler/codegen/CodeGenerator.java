@@ -14,11 +14,12 @@ public class CodeGenerator {
 
     private int tempCounter = 0;
     private int labelCounter = 0;
-    private SymbolTable localSymTable; // Para armazenar os temporários e labels exigidos
+    private SymbolTable localSymTable;
 
     public CodeGenerator() {
         this.localSymTable = new SymbolTable();
     }
+
 
     private String newTemp(String type) {
         String tempName = "t" + (++tempCounter);
@@ -34,6 +35,7 @@ public class CodeGenerator {
 
     public List<Instruction3AC> generate(Structure.Program program) {
         List<Instruction3AC> code = new ArrayList<>();
+
         for (Structure.ClassNode cNode : program.classes) {
             for (Structure.MethodNode mNode : cNode.methods) {
                 code.add(new Instruction3AC("LABEL", null, null, mNode.name));
@@ -48,7 +50,7 @@ public class CodeGenerator {
                     code.add(new Instruction3AC("RETURN", null, null, null));
                 }
                 code.add(new Instruction3AC("END_PROC", null, null, null));
-                code.add(new Instruction3AC("", null, null, "")); // linha em branco para separar
+                code.add(new Instruction3AC("", null, null, ""));
             }
         }
         return code;
@@ -71,27 +73,49 @@ public class CodeGenerator {
         }
         else if (stmt instanceof Statements.If ifStmt) {
             String cond = generateExpr(ifStmt.cond, code);
+
+            String labelTrue = newLabel();
             String labelFalse = newLabel();
             String labelEnd = newLabel();
 
-            code.add(new Instruction3AC("IF_FALSE_GOTO", cond, null, labelFalse));
+            code.add(new Instruction3AC("IF_GOTO", cond, null, labelTrue));
+            code.add(new Instruction3AC("GOTO", null, null, labelFalse));
+
+
+            code.add(new Instruction3AC("LABEL", null, null, labelTrue));
             generateStmt(ifStmt.thenStmt, code);
             code.add(new Instruction3AC("GOTO", null, null, labelEnd));
+
+
             code.add(new Instruction3AC("LABEL", null, null, labelFalse));
             if (ifStmt.elseStmt != null) {
                 generateStmt(ifStmt.elseStmt, code);
             }
+
+
             code.add(new Instruction3AC("LABEL", null, null, labelEnd));
         }
         else if (stmt instanceof Statements.While whileStmt) {
-            String labelStart = newLabel();
+            String labelTest = newLabel();
+            String labelTrue = newLabel();
             String labelEnd = newLabel();
 
-            code.add(new Instruction3AC("LABEL", null, null, labelStart));
+
+            code.add(new Instruction3AC("LABEL", null, null, labelTest));
             String cond = generateExpr(whileStmt.cond, code);
-            code.add(new Instruction3AC("IF_FALSE_GOTO", cond, null, labelEnd));
+
+
+            code.add(new Instruction3AC("IF_GOTO", cond, null, labelTrue));
+            code.add(new Instruction3AC("GOTO", null, null, labelEnd));
+
+
+            code.add(new Instruction3AC("LABEL", null, null, labelTrue));
             generateStmt(whileStmt.body, code);
-            code.add(new Instruction3AC("GOTO", null, null, labelStart));
+
+
+            code.add(new Instruction3AC("GOTO", null, null, labelTest));
+
+
             code.add(new Instruction3AC("LABEL", null, null, labelEnd));
         }
         else if (stmt instanceof Statements.Print printStmt) {
@@ -144,12 +168,14 @@ public class CodeGenerator {
         if (expr instanceof Expressions.NewArray newArray) {
             String size = generateExpr(newArray.size, code);
             String temp = newTemp("int[]");
-            code.add(new Instruction3AC("CALL", "alloc", size, temp));
+
+            code.add(new Instruction3AC("NEW_ARRAY", size, null, temp));
             return temp;
         }
         if (expr instanceof Expressions.NewObject newObj) {
             String temp = newTemp(newObj.className);
-            code.add(new Instruction3AC("CALL", "alloc", "1", temp));
+
+            code.add(new Instruction3AC("NEW", newObj.className, null, temp));
             return temp;
         }
         if (expr instanceof Expressions.ArrayAccess arrAcc) {
@@ -173,7 +199,7 @@ public class CodeGenerator {
                 String argTemp = generateExpr(arg, code);
                 code.add(new Instruction3AC("PARAM", argTemp, null, null));
             }
-            code.add(new Instruction3AC("PARAM", obj, null, null)); // Implicit 'this'
+            code.add(new Instruction3AC("PARAM", obj, null, null));
 
             String temp = newTemp("var");
             code.add(new Instruction3AC("CALL", call.methodName, String.valueOf(call.args.size() + 1), temp));
