@@ -1,55 +1,48 @@
-class MainArray {
+class MainCalc {
     public static void main(String[] args) {
-        System.out.println(new Processador().executar(4));
+        System.out.println(new Calculadora().calcular(5));
     }
 }
 
-class Animal {
-    int idade ;
-
-    public int getIdade() {
-        return idade ;
+class Operacao {
+    public int base(int n) {
+        return n ;
     }
 }
 
-class Cachorro extends Animal {
-    public int getIdade() {
-        return idade ;
+class Calculadora extends Operacao {
+    int acumulador ;
+
+    public int base(int n) {
+        return n ;
     }
-}
 
-class Processador {
-    int[] numeros ;
-    Animal animal ;
-
-    public int executar(int tamanho) {
+    public int calcular(int n) {
         int i ;
-        int total ;
-        boolean valido ;
+        int soma ;
+        boolean continua ;
 
-        i = 0 ;
-        total = 0 ;
+        soma = 0 ;
+        i = 1 ;
+        continua = true ;
 
-        while (i < tamanho) {
-            numeros[i] = i * i ;
+        while (i < n) {
+            if (soma < 100) {
+                soma = soma + i * 2 ;
+            } else {
+                soma = soma - i ;
+            }
             i = i + 1 ;
         }
 
-        i = 0 ;
-        while (i < numeros.length) {
-            total = total + numeros[i] ;
-            i = i + 1 ;
-        }
+        continua = !(soma < 0) && (0 < soma) ;
 
-        valido = 0 < total ;
-        animal = new Cachorro() ;
-
-        if (valido) {
-            total = total + animal.getIdade() ;
+        if (continua) {
+            soma = soma + this.base(n) ;
         } else {
-            total = 0 ;
+            soma = 0 ;
         }
 
-        return total ;
+        return soma ;
     }
 }

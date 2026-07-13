@@ -1,0 +1,55 @@
+class MainApp {
+    public static void main(String[] args) {
+        System.out.println(new Tester().runTests(10));
+    }
+}
+
+class Helper {
+    public int doMath(int a, int b) {
+        return a + b;
+    }
+}
+
+class Tester {
+    int fieldVar;
+
+    public int runTests(int limit) {
+        // Declarações (Sempre no início do bloco na nossa gramática)
+        int localA;
+        int localB;
+        boolean flag;
+        int[] myArr;
+        Helper helper;
+
+        // Caso 1: Atribuição Simples e Aritmética
+        localA = 5;
+        localB = localA * 2;
+
+        // Caso 2: Instanciação Genérica de Objeto e Chamada de Método
+        helper = new Helper();
+        localA = helper.doMath(localA, localB);
+
+        // Caso 3: Instanciação Genérica de Array, Escrita e Leitura (.length)
+        myArr = new int[3];
+        myArr[0] = 7;
+        myArr[1] = myArr.length;
+
+        // Caso 4: Operações Relacionais e Lógicas (com negação)
+        flag = (localA < limit) && true;
+        flag = !flag;
+
+        // Caso 5: Estrutura Condicional (IF-ELSE) - Padrão Slide 6
+        if (localA < localB) {
+            fieldVar = 1;
+        } else {
+            fieldVar = 0;
+        }
+
+        // Caso 6: Laço de Repetição (WHILE) - Padrão Slide 7
+        while (fieldVar < 5) {
+            fieldVar = fieldVar + 1;
+        }
+
+        return fieldVar;
+    }
+}
